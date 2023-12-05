@@ -145,3 +145,42 @@ python train_multi_gpu.py doppelgangers/configs/training_configs/doppelgangers_c
   year      = {2023}
 }
 ```
+
+
+# Running on Customized Data
+
+## Soving Environment
+Running in a Docker Env smoothly with
+- Env: python 3.7, pytorch 1.12, CUDA 11.3
+
+Using pip with specific source
+```zsh
+pip install -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
+```
+
+## Data Preparation
+- Images
+  ```bash
+  
+  
+  ```
+- Image Pairs metadata `.npy`
+  ```python
+  array([
+    image_0_relative_path : str,
+    image_1_relative_path : str,
+    pos_neg_pair_label (pos=1, neg=0) : int,
+    number_of_SIFT_matches : int
+  ])
+  ```
+- Loftr Matching Pairs `.npy`
+  ```bash
+  {name}.npy
+  name is the order of pairs in image pairs metadata
+  ```
+- Pretrained Model
+  ```bash
+  use pretrained models in original release
+  ```
+
+  

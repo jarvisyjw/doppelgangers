@@ -2,6 +2,7 @@ import torch
 import cv2
 import numpy as np
 import os.path as osp
+import os
 import tqdm
 from PIL import Image, ImageOps
 
@@ -66,10 +67,15 @@ def save_loftr_matches(data_path, pair_path, output_path, model_weight_path="wei
     df = 8
     padding = True
 
+    if not osp.exists(output_path):
+        os.mkdir(output_path)
+        
     for idx in tqdm.tqdm(range(pairs_info.shape[0])):
         if osp.exists(output_path+'loftr_match/%d.npy'%idx):
             continue
-        name0, name1, _, _, _ = pairs_info[idx]
+        # name0, name1, _, _, _ = pairs_info[idx]
+        name0, name1, _, _, = pairs_info[idx]
+
 
         img0_pth = osp.join(data_path, name0)
         img1_pth = osp.join(data_path, name1)
@@ -81,6 +87,7 @@ def save_loftr_matches(data_path, pair_path, output_path, model_weight_path="wei
         mask1 = torch.from_numpy(mask1).cuda()
         batch = {'image0': img0, 'image1': img1, 'mask0': mask0, 'mask1':mask1}
 
+
         # Inference with LoFTR and get prediction
         with torch.no_grad():
             matcher(batch)
@@ -88,6 +95,7 @@ def save_loftr_matches(data_path, pair_path, output_path, model_weight_path="wei
             mkpts1 = batch['mkpts1_f'].cpu().numpy()
             mconf = batch['mconf'].cpu().numpy()
 
-            np.save(output_path+'loftr_match/%d.npy'%idx, {"kpt0": mkpts0, "kpt1": mkpts1, "conf": mconf})
+            np.save(output_path+'/%d.npy'%idx, {"kpt0": mkpts0, "kpt1": mkpts1, "conf": mconf})
+            # np.save(output_path+'loftr_match/%d.npy'%idx, {"kpt0": mkpts0, "kpt1": mkpts1, "conf": mconf})
 
 

@@ -1,0 +1,85 @@
+import numpy as np
+import argparse
+from tqdm import tqdm
+from pathlib import Path
+import cv2
+import sys
+sys.path.append('../doppelgangers')
+from doppelgangers.utils.loftr_matches import save_loftr_matches
+
+def sift_matches(root_dir: str, image0: str, image1: str):
+    # read
+    image0 = cv2.imread(str(Path(root_dir, image0)))
+    image1 = cv2.imread(str(Path(root_dir, image1)))
+
+    # extract
+    sift = cv2.xfeatures2d.SIFT_create()
+    kp0, des0 = sift.detectAndCompute(image0, None)
+    kp1, des1 = sift.detectAndCompute(image1, None)
+
+    # match, mutual test ratio 0.75
+    bf = cv2.BFMatcher()
+    matches = bf.knnMatch(des0,des1,k=2)
+    good_matches = []
+
+    for m,n in matches:
+        if m.distance < 0.75*n.distance:
+            good_matches.append(m)
+    
+    # homography estimation
+    point_map = np.array([
+        [kp0[match.queryIdx].pt[0],
+         kp0[match.queryIdx].pt[1],
+         kp1[match.trainIdx].pt[0],
+         kp1[match.trainIdx].pt[1]] for match in good_matches
+    ], dtype=np.float32)
+
+    F, inliers_idx = cv2.findFundamentalMat(point_map[:, :2], point_map[:, 2:], cv2.FM_RANSAC, 3.0)
+    inliers = point_map[inliers_idx.ravel() == 1]
+
+    return len(inliers), inliers
+
+
+# transfer from txt to npy
+def txt2npy(root_dir, txt_file, npy_file):
+    
+    if not isinstance(txt_file, str):
+        raise TypeError('txt file path must be a str')
+    
+    if Path(npy_file).is_dir():
+        npy_file = Path(npy_file, "pairs.npy")
+
+    f = open(txt_file, 'r')
+    pairs = []
+    for line in tqdm(f.readlines()):
+      
+      line_str = line.strip('\n').split(', ')
+      image0, image1, label = line_str
+      num_matches, _ = sift_matches(root_dir, image0, image1)
+      line_numpy = np.array([str(image0), str(image1), int(label), num_matches], dtype=object)
+      # print(line_numpy.shape)
+      pairs.append(line_numpy)
+    
+    out = np.array(pairs)
+#     print(out.shape)
+#     print(out)
+    np.save(npy_file, out)
+    print('Done!')
+
+
+def parser():
+    parser = argparse.ArgumentParser(description='txt2npy')
+    parser.add_argument('--npy_path', default='data/train.npy', type=str, help='npy path')
+    parser.add_argument('--txt_path', default='data/train.txt', type=str, help='txt path')
+    parser.add_argument('--root_dir')
+    parser.add_argument('--output')
+    parser.add_argument('--weights')
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+      args = parser()
+      # txt2npy(args.root_dir, args.txt_path, args.npy_path)
+      weights = '../weights/outdoor_ds.ckpt'
+      save_loftr_matches(args.root_dir, args.npy_path, args.output, args.weights)
+      # load_data(args.npy_path)
