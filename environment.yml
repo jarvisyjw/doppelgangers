@@ -5,7 +5,7 @@ channels:
   - defaults
 dependencies:
   - python=3.8
-  - cudatoolkit=10.2
+  - cudatoolkit=12
   - scikit-learn=1.0.2
   - sqlite
   - tensorboardx

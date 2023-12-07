@@ -95,7 +95,7 @@ class Trainer(BaseTrainer):
         pred_list = list()
         prob_list = list()
         with torch.no_grad():
-            for bidx, data in tqdm.tqdm(enumerate(test_loader)):
+            for bidx, data in tqdm.tqdm(enumerate(test_loader), total=len(test_loader)):
                 data['image'] = data['image'].cuda()
                 gt = data['gt'].cuda()
                 score = self.decoder(data['image'])

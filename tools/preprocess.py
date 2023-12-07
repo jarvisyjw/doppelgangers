@@ -14,6 +14,7 @@ def sift_matches(root_dir: str, image0: str, image1: str):
 
     # extract
     sift = cv2.xfeatures2d.SIFT_create()
+#     sift = cv2.SIFT_create()
     kp0, des0 = sift.detectAndCompute(image0, None)
     kp1, des1 = sift.detectAndCompute(image1, None)
 
@@ -67,6 +68,46 @@ def txt2npy(root_dir, txt_file, npy_file):
     print('Done!')
 
 
+def check_pair(root_dir, image0, image1):
+      assert Path(root_dir, image0).is_file(), "image0 is not a file"
+      assert Path(root_dir, image1).is_file(), "image1 is not a file"
+      num_matches, _ = sift_matches(root_dir, image0, image1)
+      return num_matches
+
+
+def check_txt(root_dir, txt_file, npy_file):
+      if not isinstance(txt_file, str):
+           raise TypeError('txt file path must be a str')
+    
+      if Path(npy_file).is_dir():
+            npy_file = Path(npy_file, "pairs.npy")
+
+      pairs = []
+      missing = []
+      f = open(txt_file, 'r')
+      for line in tqdm(f.readlines()):
+            line_str = line.strip('\n').split(', ')
+            image0, image1, label = line_str
+            print(image0, image1, label)
+            try:
+                  num_matches = check_pair(root_dir, image0, image1)
+            except:
+                  missing.append([image0, image1])
+                  print("Error: ", image0, image1)
+                  continue
+            line_numpy = np.array([str(image0), str(image1), int(label), num_matches], dtype=object)
+            print(line_numpy)
+            pairs.append(line_numpy)
+
+      missing = np.array(missing)
+      out = np.array(pairs)
+      np.save(npy_file, out)
+      if len(missing) > 0:
+            print(missing.shape)
+            np.save(npy_file + ".missing", missing)
+      print('Done!')
+
+
 def parser():
     parser = argparse.ArgumentParser(description='txt2npy')
     parser.add_argument('--npy_path', default='data/train.npy', type=str, help='npy path')
@@ -78,8 +119,15 @@ def parser():
 
 
 if __name__ == "__main__":
-      args = parser()
+      # args = parser()
+      root_dir = "data/robotcar_seasons/images"
+      txt_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_val_mini.txt"
+      npy_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud.npy"
+      # check_txt(root_dir, txt_path, npy_path)
+      # txt2npy(root_dir, txt_path, npy_path)
       # txt2npy(args.root_dir, args.txt_path, args.npy_path)
-      weights = '../weights/outdoor_ds.ckpt'
-      save_loftr_matches(args.root_dir, args.npy_path, args.output, args.weights)
+      weights = 'weights/outdoor_ds.ckpt'
+      # save_loftr_matches(args.root_dir, args.npy_path, args.output, args.weights)
+      output = 'data/robotcar_seasons/loftr_matches/qAutumn_dbSunCloud'
+      save_loftr_matches(root_dir, txt_path, output, weights)
       # load_data(args.npy_path)
