@@ -108,6 +108,12 @@ def check_txt(root_dir, txt_file, npy_file):
       print('Done!')
 
 
+def split_data(all_pairs: str, split_pairs: str, length: int):
+    all_list = np.load(all_pairs, allow_pickle=True)
+    split_list = all_list[:length]
+    np.save(split_pairs, split_list)
+
+
 def parser():
     parser = argparse.ArgumentParser(description='txt2npy')
     parser.add_argument('--npy_path', default='data/train.npy', type=str, help='npy path')
@@ -120,14 +126,17 @@ def parser():
 
 if __name__ == "__main__":
       # args = parser()
-      root_dir = "data/robotcar_seasons/images"
-      txt_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_val_mini.txt"
-      npy_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud.npy"
-      # check_txt(root_dir, txt_path, npy_path)
-      # txt2npy(root_dir, txt_path, npy_path)
-      # txt2npy(args.root_dir, args.txt_path, args.npy_path)
-      weights = 'weights/outdoor_ds.ckpt'
-      # save_loftr_matches(args.root_dir, args.npy_path, args.output, args.weights)
-      output = 'data/robotcar_seasons/loftr_matches/qAutumn_dbSunCloud'
-      save_loftr_matches(root_dir, txt_path, output, weights)
+      all_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight.npy'
+      split_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_val.npy'
+      split_data(all_pairs, split_pairs, 10000)
+    #   root_dir = "data/robotcar_seasons/images"
+    #   txt_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_val_mini.txt"
+    #   npy_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud.npy"
+    #   # check_txt(root_dir, txt_path, npy_path)
+    #   # txt2npy(root_dir, txt_path, npy_path)
+    #   # txt2npy(args.root_dir, args.txt_path, args.npy_path)
+    #   weights = 'weights/outdoor_ds.ckpt'
+    #   # save_loftr_matches(args.root_dir, args.npy_path, args.output, args.weights)
+    #   output = 'data/robotcar_seasons/loftr_matches/qAutumn_dbSunCloud'
+    #   save_loftr_matches(root_dir, txt_path, output, weights)
       # load_data(args.npy_path)

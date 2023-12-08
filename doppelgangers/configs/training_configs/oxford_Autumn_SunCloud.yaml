@@ -1,0 +1,39 @@
+data:
+  type: doppelgangers.datasets.pairwise_disambiguation_dataset
+  num_workers: 4  
+  train:
+    image_dir: ['data/robotcar_seasons/images/']
+    loftr_match_dir: ['data/robotcar_seasons/loftr_matches/qAutumn_dbSunCloud/']
+    batch_size: 8
+    img_size: 1024
+    pair_path: ['data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_train.npy']
+  test:
+    image_dir: ['data/robotcar_seasons/images/']
+    loftr_match_dir: ['data/robotcar_seasons/loftr_matches/qAutumn_dbNight/']
+    batch_size: 8
+    img_size: 1024
+    pair_path: ['data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_val.npy']
+
+models:
+  decoder:
+    type: doppelgangers.models.cnn_classifier
+    input_dim: 10
+
+trainer:
+  type: trainers.doppelgangers_trainer
+  epochs: 20
+  seed: 100
+  opt:
+    type: 'adam'
+    lr: 5e-4  #  use default learning rate
+    beta1: 0.9
+    beta2: 0.999
+    momentum: 0.9  # for SGD
+    weight_decay: 0.
+    scheduler: 'linear'
+    step_epoch: 10
+
+viz:
+  log_freq: 10
+  save_freq: 1
+  val_freq: 10000
