@@ -113,7 +113,7 @@ def compute_ap(y_true, y_scores):
     return AP
 
 
-def plot_pr_curve(y_true, y_scores, writer, step=None, epoch=None, name=None):
+def plot_pr_curve(y_true, y_scores, writer, step=None, epoch=None, name=None, output=None):
     y_scores_s = softmax(y_scores, axis=1)
     y_scores = y_scores_s[:, 1]
     precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
@@ -140,4 +140,6 @@ def plot_pr_curve(y_true, y_scores, writer, step=None, epoch=None, name=None):
         writer.add_image(name+'_step', img, step)
     else:
         writer.add_image(name+'_epoch', img, epoch)
+    if output is not None:
+        plt.savefig(output)
     plt.close(figure)

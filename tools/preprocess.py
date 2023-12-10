@@ -108,10 +108,17 @@ def check_txt(root_dir, txt_file, npy_file):
       print('Done!')
 
 
-def split_data(all_pairs: str, split_pairs: str, length: int):
-    all_list = np.load(all_pairs, allow_pickle=True)
-    split_list = all_list[:length]
-    np.save(split_pairs, split_list)
+def split_data(all_pairs: str, split_pairs: str, length):
+    if len(length) > 1:
+        all_list = np.load(all_pairs, allow_pickle=True)
+        if length[1] == -1:
+            split_list = all_list[length[0]:]
+        split_list = all_list[length[0]:length[1]]
+        np.save(split_pairs, split_list)
+    else:
+        all_list = np.load(all_pairs, allow_pickle=True)
+        split_list = all_list[:length]
+        np.save(split_pairs, split_list)
 
 
 def parser():
@@ -126,9 +133,19 @@ def parser():
 
 if __name__ == "__main__":
       # args = parser()
-      all_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight.npy'
-      split_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_val.npy'
-      split_data(all_pairs, split_pairs, 10000)
+    all_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight.npy'
+    test_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_test.npy'
+    #   split_data(all_pairs, split_pairs, [10001,-1]
+    train_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_train.npy'
+
+    import sklearn.model_selection as model_selection
+    # model_selection.train_test_split()
+    all_list = np.load(all_pairs, allow_pickle=True)
+    train, test = model_selection.train_test_split(all_list, test_size=0.2, random_state=42)
+    print(f'####### DATA Length ####### \n train: {train.shape}, test: {test.shape}')
+    np.save(train_pairs, train)
+    np.save(test_pairs, test)
+
     #   root_dir = "data/robotcar_seasons/images"
     #   txt_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_val_mini.txt"
     #   npy_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud.npy"
