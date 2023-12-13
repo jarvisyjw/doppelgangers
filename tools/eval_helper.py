@@ -1,26 +1,26 @@
-from . import io, matcher_helper
+# from . import io, matcher_helper
 
-from multipledispatch import dispatch
+# from multipledispatch import dispatch
 from pathlib import Path
-from vpr_val import logger
+# from vpr_val import logger
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from sklearn.metrics import average_precision_score, precision_recall_curve, ConfusionMatrixDisplay
-
+from scipy.special import softmax
 
 # max recall @ 100% precision
 def max_recall(precision: np.ndarray, recall: np.ndarray):
     recall_idx = np.argmax(recall)
     idx = np.where(precision == 1.0)
     max_recall = np.max(recall[idx])
-    logger.debug(f'max recall{max_recall}')
+    # logger.debug(f'max recall{max_recall}')
     recall_idx = np.array(np.where(recall == max_recall)).reshape(-1)
     recall_idx = recall_idx[precision[recall_idx]==1.0]
-    logger.debug(f'recall_idx {recall_idx}')
+    # logger.debug(f'recall_idx {recall_idx}')
     r_precision, r_recall = float(np.squeeze(precision[recall_idx])), float(np.squeeze(recall[recall_idx]))
-    logger.debug(f'precision: {r_precision}, recall: {r_recall}')
+    # logger.debug(f'precision: {r_precision}, recall: {r_recall}')
     return r_precision, r_recall
 
 def plot_pr_curve(recall: np.ndarray, precision: np.ndarray, average_precision, dataset = 'robotcar', exp_name = 'test'):
@@ -80,3 +80,26 @@ def evaluate(pointMap: Path, gt_file: str, dataset = 'SeqVal', exp_name = 'test'
                 f'Maximum & Minimum matches: {np.max(matches_pts)}' + ' & ' + f'{np.min(matches_pts)} \n' +
                 'Maximum Recall @ 100% Precision: {:.3f} \n'.format(r_recall))
 
+if __name__ == '__main__':
+    # val_log='/home/jarvis/jw_ws/Verification/doppelgangers/logs/oxford_Autumn_SunCloud_finetune_2023-Dec-09-13-21-54/test_doppelgangers_list.npy'
+    val_log = '/home/jarvis/jw_ws/Verification/doppelgangers/logs/oxford_Autumn_SunCloud_2023-Dec-08-18-54-40/test_doppelgangers_list.npy'
+    # val_log = '/home/jarvis/jw_ws/Verification/doppelgangers/logs/oxford_qAutumn_dbNight_val_2023-Dec-07-13-18-31/test_doppelgangers_list.npy'
+
+    import numpy
+    result_list = numpy.load(val_log, allow_pickle=True)
+#     import pdb; pdb.set_trace()
+    result_list = result_list.tolist()
+    pred = result_list['pred']
+    gt_list = result_list['gt']
+    prob = result_list['prob']
+    y_scores_s = softmax(prob, axis=1)
+    y_scores = y_scores_s[:, 1]
+    precision, recall, TH = precision_recall_curve(gt_list, y_scores)
+    average_precision = average_precision_score(gt_list, y_scores)
+    plot_pr_curve(recall, precision, average_precision, 'robotcar', 'doppelgangers')
+    plt.show()
+#     import pdb; pdb.set_trace()
+    # plt.scatter(recall, precision, c = np.array([*TH,1]).reshape(-1,1))
+#     plt.plot(recall, precision)
+#     plot_pr_curve()
+    # plt.show()

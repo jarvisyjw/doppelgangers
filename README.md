@@ -151,17 +151,16 @@ python train_multi_gpu.py doppelgangers/configs/training_configs/doppelgangers_c
 
 ## Soving Environment
 Running in a Docker Env smoothly with
+- Docker image: `pytorch/pytorch:1.12.0-cuda11.3-cudnn8-devel`
 - Env: python 3.7, pytorch 1.12, CUDA 11.3
-
-Using pip with specific source
-```zsh
-pip install -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
-```
+- Using pip with specific source
+  ```zsh
+  pip install -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
+  ```
 
 ## Data Preparation
 - Images
   ```bash
-  
   
   ```
 - Image Pairs metadata `.npy`

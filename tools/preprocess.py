@@ -131,21 +131,33 @@ def parser():
     return parser.parse_args()
 
 
+def npy2txt(npy: str, txt: str):
+    pairs = np.load(npy, allow_pickle=True)
+    with open(txt, 'w') as f:
+        for pair in tqdm(pairs, total=len(pairs)):
+            image0, image1, label, num_matches = pair
+            f.write(f'{image0} {image1} {label}\n')
+    print('Done!')
+    
+
 if __name__ == "__main__":
       # args = parser()
-    all_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight.npy'
-    test_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_test.npy'
-    #   split_data(all_pairs, split_pairs, [10001,-1]
-    train_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_train.npy'
+    # all_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight.npy'
+    # test_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_test.npy'
+    # #   split_data(all_pairs, split_pairs, [10001,-1]
+    # train_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_train.npy'
 
-    import sklearn.model_selection as model_selection
-    # model_selection.train_test_split()
-    all_list = np.load(all_pairs, allow_pickle=True)
-    train, test = model_selection.train_test_split(all_list, test_size=0.2, random_state=42)
-    print(f'####### DATA Length ####### \n train: {train.shape}, test: {test.shape}')
-    np.save(train_pairs, train)
-    np.save(test_pairs, test)
+    # import sklearn.model_selection as model_selection
+    # # model_selection.train_test_split()
+    # all_list = np.load(all_pairs, allow_pickle=True)
+    # train, test = model_selection.train_test_split(all_list, test_size=0.2, random_state=42)
+    # print(f'####### DATA Length ####### \n train: {train.shape}, test: {test.shape}')
+    # np.save(train_pairs, train)
+    # np.save(test_pairs, test)
 
+    npy = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_test.npy'
+    txt = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_test.txt'
+    npy2txt(npy, txt)
     #   root_dir = "data/robotcar_seasons/images"
     #   txt_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_val_mini.txt"
     #   npy_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud.npy"
