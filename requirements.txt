@@ -19,3 +19,4 @@ joblib>=1.0.1
 scipy
 pillow
 scikit-learn # for sklearn.metrics
+tensorboardX

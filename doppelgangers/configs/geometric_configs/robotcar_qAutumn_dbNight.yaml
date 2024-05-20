@@ -1,0 +1,13 @@
+data:
+  name: robotcar_qAutumn_dbNight
+  type: doppelgangers.datasets.pairwise_dataset
+  num_workers: 4
+  image_dir: 'data/robotcar_seasons/images'
+  loftr_match_dir: 'data/robotcar_seasons/loftr_matches/qAutumn_dbNight/'
+  batch_size: 1
+  img_size: 1024
+  pair_path: 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_test.npy'
+
+exp:
+  name: robotcar_qAutumn_dbNight_geometric_verification
+  save_dir: 'experiments/robotcar_qAutumn_dbNight_geometric_verification/'

@@ -165,6 +165,7 @@ class Trainer(BaseTrainer):
         if writer is not None:
             for k, v in val_info.items():
                 if 'pr_curve' in k:
+                    # v[0]: gt, v[1]: prob
                     plot_pr_curve(v[0], v[1], writer, step=step, epoch=epoch, name=k)
                 else:
                     if step is not None:

@@ -65,6 +65,7 @@ class DoppelgangersDataset(Dataset):
         if np.sum(conf>0.8) == 0:
             matches = None
         else:
+            # Using RANSAC to filter out outliers
             F, mask = cv2.findFundamentalMat(keypoints0[conf>0.8],keypoints1[conf>0.8],cv2.FM_RANSAC, 3, 0.99)
             if mask is None or F is None:
                 matches = None
