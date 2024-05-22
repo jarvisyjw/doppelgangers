@@ -6,18 +6,19 @@ data:
     loftr_match_dir: ['data/robotcar_seasons/loftr_matches/']
     batch_size: 8
     img_size: 1024
-    pair_path: ['data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight.npy']
+    pair_path: ['data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_train.npy']
   test:
     image_dir: ['data/robotcar_seasons/images']
     loftr_match_dir: ['data/robotcar_seasons/loftr_matches/qAutumn_dbNight/']
     batch_size: 8
     img_size: 1024
-    pair_path: ['data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight.npy']
+    pair_path: ['data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_test.npy']
 
 models:
   decoder:
     type: doppelgangers.models.cnn_classifier
     input_dim: 10
+  path: '/home/yujingwen/workspace/doppelgangers/logs/oxford_Autumn_SunCloud_2023-Dec-13-00-01-02/checkpoints/epoch_19_iters_34400.pt'
 
 trainer:
   type: trainers.doppelgangers_trainer

@@ -9,10 +9,10 @@ data:
     pair_path: ['data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_train.npy']
   test:
     image_dir: ['data/robotcar_seasons/images/']
-    loftr_match_dir: ['data/robotcar_seasons/loftr_matches/qAutumn_dbNight/']
+    loftr_match_dir: ['data/robotcar_seasons/loftr_matches/qAutumn_dbSunCloud/']
     batch_size: 8
     img_size: 1024
-    pair_path: ['data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_val.npy']
+    pair_path: ['data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_test.npy']
 
 models:
   decoder:
@@ -32,6 +32,7 @@ trainer:
     weight_decay: 0.
     scheduler: 'linear'
     step_epoch: 10
+
 
 viz:
   log_freq: 10

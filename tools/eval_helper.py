@@ -82,9 +82,11 @@ def evaluate(pointMap: Path, gt_file: str, dataset = 'SeqVal', exp_name = 'test'
 
 if __name__ == '__main__':
     # val_log='/home/jarvis/jw_ws/Verification/doppelgangers/logs/oxford_Autumn_SunCloud_finetune_2023-Dec-09-13-21-54/test_doppelgangers_list.npy'
-    val_log = '/home/jarvis/jw_ws/Verification/doppelgangers/logs/oxford_Autumn_SunCloud_2023-Dec-08-18-54-40/test_doppelgangers_list.npy'
+    # val_log = '/home/jarvis/jw_ws/Verification/doppelgangers/logs/oxford_Autumn_SunCloud_2023-Dec-08-18-54-40/test_doppelgangers_list.npy'
     # val_log = '/home/jarvis/jw_ws/Verification/doppelgangers/logs/oxford_qAutumn_dbNight_val_2023-Dec-07-13-18-31/test_doppelgangers_list.npy'
-
+    # val_log = '/home/yujingwen/workspace/doppelgangers/logs/oxford_Autumn_SunCloud_2023-Dec-13-00-01-02/test_doppelgangers_list.npy'
+    val_log = '/home/yujingwen/workspace/doppelgangers/logs/oxford_Autumn_SunCloud_finetune_2023-Dec-09-13-21-54/test_doppelgangers_list.npy'
+    
     import numpy
     result_list = numpy.load(val_log, allow_pickle=True)
 #     import pdb; pdb.set_trace()
@@ -97,7 +99,7 @@ if __name__ == '__main__':
     precision, recall, TH = precision_recall_curve(gt_list, y_scores)
     average_precision = average_precision_score(gt_list, y_scores)
     plot_pr_curve(recall, precision, average_precision, 'robotcar', 'doppelgangers')
-    plt.show()
+    plt.savefig(Path(Path(val_log).parent,'pr_curve.png'))
 #     import pdb; pdb.set_trace()
     # plt.scatter(recall, precision, c = np.array([*TH,1]).reshape(-1,1))
 #     plt.plot(recall, precision)
