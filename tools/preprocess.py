@@ -7,6 +7,7 @@ import sys
 sys.path.append('../doppelgangers')
 from doppelgangers.utils.loftr_matches import save_loftr_matches
 
+
 def sift_matches(root_dir: str, image0: str, image1: str):
     # read
     image0 = cv2.imread(str(Path(root_dir, image0)))
