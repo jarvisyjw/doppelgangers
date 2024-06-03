@@ -15,7 +15,7 @@ def sift_matches(root_dir: str, image0: str, image1: str):
 
     # extract
     sift = cv2.xfeatures2d.SIFT_create()
-#     sift = cv2.SIFT_create()
+    # sift = cv2.SIFT_create()
     kp0, des0 = sift.detectAndCompute(image0, None)
     kp1, des1 = sift.detectAndCompute(image1, None)
 
@@ -54,17 +54,13 @@ def txt2npy(root_dir, txt_file, npy_file):
     f = open(txt_file, 'r')
     pairs = []
     for line in tqdm(f.readlines()):
-      
-      line_str = line.strip('\n').split(', ')
+      line_str = line.strip('\n').split(' ')
       image0, image1, label = line_str
       num_matches, _ = sift_matches(root_dir, image0, image1)
       line_numpy = np.array([str(image0), str(image1), int(label), num_matches], dtype=object)
-      # print(line_numpy.shape)
       pairs.append(line_numpy)
     
     out = np.array(pairs)
-#     print(out.shape)
-#     print(out)
     np.save(npy_file, out)
     print('Done!')
 
@@ -129,6 +125,8 @@ def parser():
     parser.add_argument('--root_dir')
     parser.add_argument('--output')
     parser.add_argument('--weights')
+    parser.add_argument('--loftr', action='store_true')
+    parser.add_argument('--pairs', action='store_true')
     return parser.parse_args()
 
 
@@ -139,10 +137,31 @@ def npy2txt(npy: str, txt: str):
             image0, image1, label, num_matches = pair
             f.write(f'{image0} {image1} {label}\n')
     print('Done!')
-    
+
 
 if __name__ == "__main__":
-      # args = parser()
+    args = parser()
+    # Step 1: Generate pairs meta info
+    if args.pairs:
+        if Path(args.npy_path).is_file():
+            raise Warning('npy file already exists, skip generation.')
+        else:
+            txt2npy(args.root_dir, args.txt_path, args.npy_path)
+
+    # Step 2: Extract loftr matches
+    if args.loftr:
+        '''Ectract loftr matches from pairs metadata
+        Args:
+            --root_dir: str, root directory of the images
+            --npy_path: str, path to the pairs metadata
+            --output: str, output directory to save the loftr matches
+            --weights: str, path to the loftr weights
+        '''
+        save_loftr_matches(args.root_dir, args.npy_path, args.output, args.weights)
+    
+
+    # extract loftr matches
+    
     # all_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight.npy'
     # test_pairs = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbNight_test.npy'
     # #   split_data(all_pairs, split_pairs, [10001,-1]
@@ -156,9 +175,9 @@ if __name__ == "__main__":
     # np.save(train_pairs, train)
     # np.save(test_pairs, test)
 
-    npy = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_test.npy'
-    txt = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_test.txt'
-    npy2txt(npy, txt)
+    # npy = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_test.npy'
+    # txt = 'data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_test.txt'
+    # npy2txt(npy, txt)
     #   root_dir = "data/robotcar_seasons/images"
     #   txt_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_val_mini.txt"
     #   npy_path = "data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud.npy"

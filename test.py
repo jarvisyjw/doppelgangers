@@ -81,8 +81,8 @@ def main_worker(gpu, ngpus_per_node, cfg, args):
     test_loader = loaders['test_loader']
     trainer_lib = importlib.import_module(cfg.trainer.type)
     trainer = trainer_lib.Trainer(cfg, args)
-    # trainer.resume(args.pretrained, test=True)
-    trainer.resume(cfg.models.path,test=True)
+    trainer.resume(args.pretrained, test=True)
+    # trainer.resume(cfg.models.path,test=True)
     val_info = trainer.validate(test_loader, epoch=-1)
     trainer.log_val(val_info, writer=writer, step=-1)
     print("Test done:")

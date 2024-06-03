@@ -62,8 +62,8 @@ def save_loftr_matches(data_path, pair_path, output_path, model_weight_path="wei
     matcher.load_state_dict(torch.load(model_weight_path)['state_dict'])
     matcher = matcher.eval().cuda()
 
-    # pairs_info = np.load(pair_path, allow_pickle=True)
-    pairs_info = np.loadtxt(pair_path, dtype=str, delimiter=', ')
+    pairs_info = np.load(pair_path, allow_pickle=True)
+    # pairs_info = np.loadtxt(pair_path, dtype=str, delimiter=', ')
     img_size = 1024
     df = 8
     padding = True
@@ -74,8 +74,8 @@ def save_loftr_matches(data_path, pair_path, output_path, model_weight_path="wei
     for idx in tqdm.tqdm(range(pairs_info.shape[0])):
         if osp.exists(output_path+'loftr_match/%d.npy'%idx):
             continue
-        # name0, name1, _, _, _ = pairs_info[idx]
-        name0, name1, _, = pairs_info[idx]
+        name0, name1, _, _ = pairs_info[idx]
+        # name0, name1, _, = pairs_info[idx]
 
 
         img0_pth = osp.join(data_path, name0)

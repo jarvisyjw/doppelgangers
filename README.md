@@ -161,9 +161,13 @@ Running in a Docker Env smoothly with
 ## Data Preparation
 - Images
   ```bash
-  
+  Download GV-Bench from google drive
   ```
+
 - Image Pairs metadata `.npy`
+  ```bash
+  python tools/preprocess.py --pairs --root_dir --txt_path --npy_path 
+  ```
   ```python
   array([
     image_0_relative_path : str,
@@ -172,14 +176,31 @@ Running in a Docker Env smoothly with
     number_of_SIFT_matches : int
   ])
   ```
+
 - Loftr Matching Pairs `.npy`
+  ```bash
+  python tools/preprocess.py --root_dir data/GV-Bench/images\ 
+    --npy_path data/GV-Bench/pairs_metadata/day.npy \
+    --output data/GV-Bench/loftr_matches/day \
+    --weights weights/outdoor_ds.ckpt \
+    --loftr
+  ```
   ```bash
   {name}.npy
   name is the order of pairs in image pairs metadata
   ```
 - Pretrained Model
   ```bash
-  use pretrained models in original release
+  # use pretrained models in original release
+  # configs in doppelgangers/config/gvbench
+  python test.py doppelgangers/config/gvbench/{config}.yaml
+  # plot PR-Curve
+  python tools/eval_helper.py --pr --val_logs /path/to/val/logs
+  # The PR-Curve will be saved at the val_log folder
+  ```
+- Fintune or train from scratch
+  ```bash
+  TODO!
   ```
 
   
