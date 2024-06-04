@@ -179,7 +179,7 @@ Running in a Docker Env smoothly with
 
 - Loftr Matching Pairs `.npy`
   ```bash
-  python tools/preprocess.py --root_dir data/GV-Bench/images\ 
+  python tools/preprocess.py --root_dir data/GV-Bench/images \ 
     --npy_path data/GV-Bench/pairs_metadata/day.npy \
     --output data/GV-Bench/loftr_matches/day \
     --weights weights/outdoor_ds.ckpt \

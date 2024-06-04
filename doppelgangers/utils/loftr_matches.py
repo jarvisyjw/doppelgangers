@@ -72,11 +72,10 @@ def save_loftr_matches(data_path, pair_path, output_path, model_weight_path="wei
         os.mkdir(output_path)
         
     for idx in tqdm.tqdm(range(pairs_info.shape[0])):
-        if osp.exists(output_path+'loftr_match/%d.npy'%idx):
+        if osp.exists(output_path+'/%d.npy'%idx):
             continue
         name0, name1, _, _ = pairs_info[idx]
         # name0, name1, _, = pairs_info[idx]
-
 
         img0_pth = osp.join(data_path, name0)
         img1_pth = osp.join(data_path, name1)
