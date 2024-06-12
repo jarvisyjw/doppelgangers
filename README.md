@@ -199,6 +199,25 @@ Running in a Docker Env smoothly with
   # The PR-Curve will be saved at the val_log folder
   ```
 - Fintune or train from scratch
+  - Train from scratch on Pittsburgh250k dataset (Test on GV-Bench)
+    ```bash
+    |---database
+    |---datasets
+    |---groundtruth
+    |---queries_real
+    poses.txt
+    readGt.m
+    ```
+  - Generate visually similar pairs
+    
+    Two types of pairs FPs (False Positives) and FNs (False Negatives) are what we are interested in.
+    We proposed to use anyloc (RAL 2023) to generate hard pairs for training.
+    A mini running script for extracting anyloc descriptor is implemented as `anyloc_mini.py`.
+    ```bash
+    python anyloc_mini.py
+    
+    ```
+
   ```bash
   TODO!
   ```
