@@ -60,7 +60,6 @@ class Args:
     desc_facet: Literal["query", "key", "value", "token"] = "value"
     domain: str = 'urban'
     
-    
 def main(args):
     # parameters
     domain = args.domain
