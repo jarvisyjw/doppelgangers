@@ -1,0 +1,21 @@
+data:
+# dataset config
+  type: anyloc.datasets.base_datasets
+  split: val
+  dataset_name: pitts250k
+  dataset_folder: data/
+  image_ext: jpg
+  max_img_size: 1024 # Maximum edge length (expected) across all images (GPU OOM)
+  positive_dist_threshold: 25
+  # dataloader config
+  num_workers: 4
+  batch_size: 8
+  shuffle: False
+
+model:
+# default model of AnyLoc
+  type: anyloc.models.anyloc_dinov2
+  domain: urban # 'aerial', 'indoor', 'urban'
+  num_c: 32 # num of cluster in VLAD
+  desc_layer: 31 # layer of descriptor
+  desc_facet: value # 'query', 'key', 'value', 'token'
