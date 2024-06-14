@@ -106,7 +106,7 @@ def get_top_k_recall(top_k: List[int], db: torch.Tensor,
     recalls = dict(zip(top_k, [0]*len(top_k)))
     print("Starting retrieval...")
     # print(qu.shape,indices.shape)
-    for i_qu, qu_retr in tqdm(enumerate(indices)):
+    for i_qu, qu_retr in enumerate(indices):
         for i_rec in top_k:
             # Correct database images (for the retrieval)
             """
@@ -148,7 +148,8 @@ def retrieve(cfg):
     database_tensors = dataset.get_database_descs_tensor()
     query_tensors = dataset.get_queries_descs_tensor()
     soft_positives_per_query = dataset.get_queries_positives()
-    dists, indices, recalls = get_top_k_recall(cfg.topk, database_tensors, query_tensors, soft_positives_per_query, use_gpu=False, norm_descs=True)
+    dists, indices, recalls = get_top_k_recall(cfg.topk, database_tensors, query_tensors, 
+                                               soft_positives_per_query, use_gpu=False, norm_descs=True)
     print(f'dists: {dists}')
     print(f'indices: {indices}')
     print(f'recalls: {recalls}')
