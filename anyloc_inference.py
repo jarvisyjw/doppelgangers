@@ -104,7 +104,7 @@ def get_top_k_recall(top_k: List[int], db: torch.Tensor,
     distances, indices = index.search(qu, max(top_k))
     recalls = dict(zip(top_k, [0]*len(top_k)))
     # print(qu.shape,indices.shape)
-    for i_qu, qu_retr in enumerate(indices):
+    for i_qu, qu_retr in tqdm(enumerate(indices)):
         for i_rec in top_k:
             # Correct database images (for the retrieval)
             """
