@@ -11,6 +11,7 @@ from typing import Union, List
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 from PIL import Image
+from tqdm import tqdm
 
 
 base_transform = T.Compose([
@@ -119,9 +120,11 @@ class BaseDataset(Dataset):
             - desc_tensor:  Tensor of shape [n, d]
         """
         desc_tensor = []
-        for desc in descs:
-            desc_tensor.append(np.load(desc, allow_pickle=True))
+        print('Loading descriptors...')
+        for desc in tqdm(descs, total=len(descs)):
+            desc_tensor.append(np.load(desc, allow_pickle=True)[0])
         desc_tensor = torch.from_numpy(np.array(desc_tensor))
+        print(f'Descriptors loaded with size: {desc_tensor.shape}')
         return desc_tensor
 
     def get_image_paths(self):
