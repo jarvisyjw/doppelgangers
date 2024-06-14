@@ -135,7 +135,7 @@ class BaseDataset(Dataset):
             # load descriptors
             query_desc = np.load(self.queries_descs[index], allow_pickle=True)
             postives = self.soft_positives_per_query[index]
-            data = { 'query_desc': query_desc,
+            data = { 'query_desc': torch.from_numpy(query_desc),
                      'pos_idx': postives
                     }
             return data
