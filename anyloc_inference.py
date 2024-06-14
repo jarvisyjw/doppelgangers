@@ -144,8 +144,8 @@ def retrieve(cfg):
     dataset = importlib.import_module(cfg.data.type).get_dataset(cfg.data)
     # build database and query tensors
     database_tensors = dataset.get_database_descs_tensor()
-    query_tensors = dataset.get_query_descs_tensor()
-    soft_positives_per_query = dataset.get_soft_positives_per_query()
+    query_tensors = dataset.get_queries_descs_tensor()
+    soft_positives_per_query = dataset.get_queries_positives()
     dists, indices, recalls = get_top_k_recall(cfg.topk, database_tensors, query_tensors, soft_positives_per_query, use_gpu=True)
     print(f'dists: {dists}')
     print(f'indices: {indices}')
