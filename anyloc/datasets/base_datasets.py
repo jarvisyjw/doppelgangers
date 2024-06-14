@@ -184,7 +184,13 @@ class BaseDataset(Dataset):
     
     def get_database_descs_tensor(self):
         return BaseDataset.build_tensor_from_descs(self.database_descs)
-        
+    
+    def get_queries_descs_tensor(self):
+        return BaseDataset.build_tensor_from_descs(self.queries_descs)
+    
+    def get_queries_positives(self):
+        return self.soft_positives_per_query
+            
 
 def get_dataset(cfg):
     dataset = BaseDataset(datasets_folder=cfg.dataset_folder,

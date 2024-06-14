@@ -142,15 +142,21 @@ def extract_gdesc(cfg):
 def retrieve(cfg):
     # load dataset for gt
     dataset = importlib.import_module(cfg.data.type).get_dataset(cfg.data)
-    # build database tensors
+    # build database and query tensors
     database_tensors = dataset.get_database_descs_tensor()
-    for idx, data in tqdm(enumerate(dataset), total=len(dataset)):
-        q_desc = data['query_desc']
-        pos_idx = data['pos_idx']
-        dists, indices, recalls = get_top_k_recall(cfg.topk, database_tensors, q_desc, pos_idx, use_gpu=True)
-        print(dists, indices, recalls)
-        print("groundtruth:", pos_idx)
-        del q_desc, pos_idx, dists, indices, recalls
+    query_tensors = dataset.get_query_descs_tensor()
+    soft_positives_per_query = dataset.get_soft_positives_per_query()
+    dists, indices, recalls = get_top_k_recall(cfg.topk, database_tensors, query_tensors, soft_positives_per_query, use_gpu=True)
+    print(f'dists: {dists}')
+    print(f'indices: {indices}')
+    print(f'recalls: {recalls}')
+    # for idx, data in tqdm(enumerate(dataset), total=len(dataset)):
+    #     q_desc = data['query_desc']
+    #     pos_idx = data['pos_idx']
+        
+    #     print(dists, indices, recalls)
+    #     print("groundtruth:", pos_idx)
+    #     del q_desc, pos_idx, dists, indices, recalls
     
 if __name__ == "__main__":
     args, cfg = parser()
