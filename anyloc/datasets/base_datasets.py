@@ -189,6 +189,7 @@ class BaseDataset(Dataset):
         return BaseDataset.build_tensor_from_descs(self.queries_descs)
     
     def get_queries_positives(self):
+        print("Getting positives...")
         return self.soft_positives_per_query
             
 
