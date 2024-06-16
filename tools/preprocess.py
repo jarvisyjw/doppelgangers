@@ -6,6 +6,7 @@ import cv2
 import sys
 import yaml
 import warnings
+import multiprocessing
 
 sys.path.append('../doppelgangers')
 sys.path.append('../anyloc')
@@ -40,8 +41,10 @@ def sift_matches(root_dir: str, image0: str, image1: str):
     # match, mutual test ratio 0.75
     bf = cv2.BFMatcher()
     matches = bf.knnMatch(des0,des1,k=2)
+    if not matches:
+        return 0, None
+    
     good_matches = []
-
     for m,n in matches:
         if m.distance < 0.75*n.distance:
             good_matches.append(m)
@@ -179,6 +182,19 @@ def npy2txt(npy: str, txt: str):
             f.write(f'{image0} {image1} {label}\n')
     print('Done!')
 
+def match_pairs(retrieval, query_path, database_path, positives_per_query, pos, neg):
+    query = query_path
+    query_name = str(Path(query.parent.name, query.name))
+    db = database_path
+    db_name = str(Path(db.parent.name, db.name))
+    num_matches, _ = sift_matches(None, query, db)
+    if retrieval in positives_per_query:
+        ret = np.array([query_name, db_name, 1, num_matches], dtype=object)
+        pos +=1
+    else:
+        ret = np.array([query_name, db_name, 0, num_matches], dtype=object)
+        neg += 1
+    return ret, pos, neg
 
 def pairs_from_retrieval(cfg):
     dataset = get_dataset(cfg.data)
@@ -189,22 +205,34 @@ def pairs_from_retrieval(cfg):
     database_paths = dataset.get_database_paths()
     pairs = []
     pos = 0
-    neg = 0    
-    for i, retrievals in tqdm(enumerate(retrieval_results), total=len(retrieval_results)):
-        for retrieval in retrievals[:20]:
-            query = queries_paths[i]
-            query_name = str(Path(query.parent.name, query.name))
-            db = database_paths[retrieval]
-            db_name = str(Path(db.parent.name, db.name))
-            num_matches, _ = sift_matches(None, query, db)
-            if retrieval in positives_per_query[i]:
-                ret = np.array([query_name, db_name, 1, num_matches], dtype=object)
-                pos +=1
-            else:
-                ret = np.array([query_name, db_name, 0, num_matches], dtype=object)
-                neg += 1
-            # print(ret)
+    neg = 0
+    q = multiprocessing.Queue()
+    processes = []
+    
+    for idx, retrievals in tqdm(enumerate(retrieval_results), total=len(retrieval_results)):
+        for i in range(cfg.pairs_from_retrieval.num_processes):
+            p = multiprocessing.Process(target=match_pairs, args=(retrievals[i], queries_paths[idx], database_paths[retrievals[i]], positives_per_query[idx], pos, neg))
+            processes.append(p)
+            p.start()
+        
+        for p in processes:
+            ret, pos, neg = q.get()
             pairs.append(ret)
+            p.join()
+        # for retrieval in retrievals[:20]:
+        #     query = queries_paths[i]
+        #     query_name = str(Path(query.parent.name, query.name))
+        #     db = database_paths[retrieval]
+        #     db_name = str(Path(db.parent.name, db.name))
+        #     num_matches, _ = sift_matches(None, query, db)
+        #     if retrieval in positives_per_query[i]:
+        #         ret = np.array([query_name, db_name, 1, num_matches], dtype=object)
+        #         pos +=1
+        #     else:
+        #         ret = np.array([query_name, db_name, 0, num_matches], dtype=object)
+        #         neg += 1
+            # print(ret)
+            # pairs.append(ret)
     out = np.array(pairs)
     np.save(cfg.pairs_from_retrieval.output_path, out)
     print('Pairs Generation Done!')
