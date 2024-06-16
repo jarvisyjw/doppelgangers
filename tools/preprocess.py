@@ -6,13 +6,13 @@ import cv2
 import sys
 import yaml
 import warnings
-import multiprocessing
 
 sys.path.append('../doppelgangers')
 sys.path.append('../anyloc')
 
 from anyloc.datasets.base_datasets import get_dataset
 from doppelgangers.utils.loftr_matches import save_loftr_matches
+from hloc import extract_features, match_features, match_dense
 
 def sift_matches(root_dir: str, image0: str, image1: str):
     '''SIFT extraction
@@ -98,7 +98,6 @@ def check_pair(root_dir, image0, image1):
       num_matches, _ = sift_matches(root_dir, image0, image1)
       return num_matches
 
-
 def check_txt(root_dir, txt_file, npy_file):
       if not isinstance(txt_file, str):
            raise TypeError('txt file path must be a str')
@@ -131,7 +130,6 @@ def check_txt(root_dir, txt_file, npy_file):
             np.save(npy_file + ".missing", missing)
       print('Done!')
 
-
 def split_data(all_pairs: str, split_pairs: str, length):
     if len(length) > 1:
         all_list = np.load(all_pairs, allow_pickle=True)
@@ -143,6 +141,15 @@ def split_data(all_pairs: str, split_pairs: str, length):
         all_list = np.load(all_pairs, allow_pickle=True)
         split_list = all_list[:length]
         np.save(split_pairs, split_list)
+
+def main_worker(cfg):
+    # Step1: Pairs from retreival
+    # Step2: Extract sift features
+    # Step3: Matching sift features
+    match_features.main(match_features.confs['NN-ratio'], pairs = Path(cfg.pairs), features= Path(args.features, f'{feature}.h5'), matches= Path(args.output_path, f'{Path(args.pairs).stem}_{feature}_NN.h5'))
+
+    
+        
 
 
 def parser():
