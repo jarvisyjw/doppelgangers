@@ -198,6 +198,23 @@ Running in a Docker Env smoothly with
   python tools/eval_helper.py --pr --val_logs /path/to/val/logs
   # The PR-Curve will be saved at the val_log folder
   ```
+  Exp results:
+  
+  MR%
+  | Method | Day | Night| Season| Weather|
+  | :------|:----|:-----|:------|:-------|
+  | GV (SP+SG)|**48.267**|**30.609**|**66.514**|**74.633**|
+  | GV (LoFTR)|45.336|18.206|12.096|18.206|
+  | Doppelgangers| 35.465| 1.991| 22.435| 30.011|
+
+  AP%
+  | Method | Day | Night| Season| Weather|
+  | :------|:----|:-----|:------|:-------|
+  | GV (SP+SG)|**99.634**|95.969|99.911|**99.907**|
+  | GV (LoFTR)|99.500|**97.881**|**99.874** | 97.881|
+  | Doppelgangers| 97.056| 60.759| 99.134| 99.574|
+
+
 - Fintune or train from scratch
   ```bash
   TODO!
