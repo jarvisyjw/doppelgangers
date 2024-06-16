@@ -1,11 +1,12 @@
 # Doppelgangers: Learning to Disambiguate Images of Similar Structures
+
 [[Running on Customized Data]](#running-on-customized-data)
 [[Experiments On Pre-trained Model]](#exp-results)
 
-[Ruojin Cai](https://www.cs.cornell.edu/~ruojin/)<sup>1</sup>, 
-[Joseph Tung]()<sup>1</sup>, 
-[Qianqian Wang](https://www.cs.cornell.edu/~qqw/)<sup>1</sup>, 
-[Hadar Averbuch-Elor](https://www.elor.sites.tau.ac.il/)<sup>2</sup>, 
+[Ruojin Cai](https://www.cs.cornell.edu/~ruojin/)<sup>1</sup>,
+[Joseph Tung]()<sup>1</sup>,
+[Qianqian Wang](https://www.cs.cornell.edu/~qqw/)<sup>1</sup>,
+[Hadar Averbuch-Elor](https://www.elor.sites.tau.ac.il/)<sup>2</sup>,
 [Bharath Hariharan](https://www.cs.cornell.edu/~bharathh/)<sup>1</sup>,
 [Noah Snavely](https://www.cs.cornell.edu/~snavely/)<sup>1</sup>
 <br>
@@ -22,7 +23,9 @@ ICCV 2023 Oral
 Implementation for paper "Doppelgangers: Learning to Disambiguate Images of Similar Structures", which proposes a learning-based approach to disambiguate distinct yet visually similar image pairs (doppelgangers) and applies it to structure-from-motion disambiguation.
 
 ## Dependencies
+
 1. Create Conda environment with Python 3.8, PyTorch 1.12.0, and CUDA 10.2 using the following commands:
+
   ```bash
   conda env create -f ./environment.yml
   conda activate doppelgangers
@@ -30,7 +33,7 @@ Implementation for paper "Doppelgangers: Learning to Disambiguate Images of Simi
 
 2. Download Colmap from their [installation page](https://colmap.github.io/install.html) (version 3.8+).
 
-## Pretrained Model 
+## Pretrained Model
 
 - Pretrained model is available in the following [link](https://doppelgangers.cs.cornell.edu/dataset/checkpoint.tar.gz).
 To use the pretrained models, download the `checkpoint.tar.gz` file, unzip and put `doppelgangers_classifier_loftr.pt` under `./weights/` folder.
@@ -45,27 +48,33 @@ To use the pretrained models, download the `checkpoint.tar.gz` file, unzip and p
   rm checkpoint.tar.gz
   rm -r doppelgangers/
   ```
+
   </details>
 
 - We use [LoFTR](https://github.com/zju3dv/LoFTR) models for feature matching. Please download the LoFTR outdoor checkpoint `outdoor_ds.ckpt` in the following Google Drive [link](https://drive.google.com/file/d/1M-VD35-qdB5Iw-AtbDBCKC7hPolFW9UY/view?usp=drive_link), and put it under `./weights/` folder.
 
 ## Dataset
+
 This section contains download links for several helpful datasets:
+
 - **SfM Disambiguation**: Download the *Structure from Motion disambigaution Dataset* from the [SfM disambiguation with COLMAP](https://github.com/cvg/sfm-disambiguation-colmap/tree/main#datasets) GitHub repository. Unzip the file under folder `./data/sfm_disambiguation/`.
 - **Pairwise Visual Disambiguation**: Download the *Doppelgangers Dataset* by following [these instructions](https://github.com/RuojinCai/doppelgangers/blob/main/data/doppelgangers_dataset/README.md) and put the dataset under folder `./data/doppelgangers_dataset/`.
 
 ## SfM Disambiguation
 
 #### Overview of applying Doppelgangers classifier to SfM disambiguation with COLMAP
+
 - We begin by performing COLMAP feature extraction and matching, which generates a list of image pairs.
 - Next, we run Doppelgangers classifiers on these image pairs, with LoFTR matches as input.
 - We then remove image pairs from the COLMAP database if they have a predicted probability below the specified threshold. These pairs are more likely to be Doppelgangers.
 - Finally, we perform COLMAP reconstruction with the pruned database.
 
 #### Demo
+
 We provide a demo on the Cup dataset to demonstrate how to use our Doppelgangers classifier in Structure from Motion disambiguation with COLMAP: `./notebook/demo_sfm_disambiguation.ipynb`.
 
 #### Script
+
 We provide a script for SfM disambiguation. The COLMAP reconstruction with Doppelgangers classifier can be found at `[output_path]/sparse_doppelgangers_[threshold]/`.
 
 ```bash
@@ -82,7 +91,7 @@ python script_sfm_disambiguation.py doppelgangers/configs/test_configs/sfm_disam
 <details>
   <summary>Details of the Arguments: [Click to expand]</summary>
 
-- To apply the Doppelgangers classifier on custom datasets, change the argument `--input_image_path [path/to/dataset]` to the dataset path accordingly, 
+- To apply the Doppelgangers classifier on custom datasets, change the argument `--input_image_path [path/to/dataset]` to the dataset path accordingly,
 and set the path for output results using the argument `--output_path [path/to/output]`.
 - If you have already completed COLMAP feature extraction and matching stage, you can skip this stage with the `--skip_feature_matching` argument, and specify the path to `database.db` file using the argument `--database_path [path/to/database.db]`.
   <details>
@@ -96,14 +105,17 @@ and set the path for output results using the argument `--output_path [path/to/o
     --skip_feature_matching \
     --database_path results/cup/database.db
   ```
+
   </details>
 
 - Use the argument `--skip_reconstruction` to skip the standard COLMAP reconstruction w/o Doppelgangers classifier.
 - Change doppelgangers threshold with argument `--threshold` and specify a value between 0 and 1. A smaller threshold includes more pairs, while a larger threshold filters out more pairs. The default threshold is set to 0.8. When the reconstruction is split into several components, consider using a smaller threshold. If the reconstruction is not completely disambiguated, consider using a larger threshold.
-- Pretrained model can be specified by the argument `--pretrained [path/to/checkpoint]`. 
+- Pretrained model can be specified by the argument `--pretrained [path/to/checkpoint]`.
+
 </details>
 
 #### Reconstruction Results
+
 [COLMAP](https://colmap.github.io/) reconstructions w/ and w/o Doppelgangers classifier of the test scenes described in the paper: [reconstructions.tar.gz](https://doppelgangers.cs.cornell.edu/dataset/reconstructions.tar.gz) (3G)
 
 ## Pairwise Visual Disambiguation
@@ -114,12 +126,13 @@ and set the path for output results using the argument `--output_path [path/to/o
 
 (a) Given a pair of images, we extract keypoints and matches via feature matching methods. Note that this is
 a negative (doppelganger) pair picturing opposite sides of the Arc de Triomphe. The feature matches are primarily in the top part of the
-structure, where there are repeated elements, as opposed to the sculptures on the bottom part. 
-(b) We create binary masks of keypoints and matches. We then align the image pair and masks with an affine transformation estimated from matches. 
+structure, where there are repeated elements, as opposed to the sculptures on the bottom part.
+(b) We create binary masks of keypoints and matches. We then align the image pair and masks with an affine transformation estimated from matches.
 (c) Our classifier takes the
 concatenation of the images and binary masks as input and outputs the probability that the given pair is positive.
 
 ### Testing the pretrained model
+
 ```bash
 # Usage:
 # python test.py [path/to/config] --pretrained [path/to/checkpoint]
@@ -128,6 +141,7 @@ python test.py doppelgangers/configs/training_configs/doppelgangers_classifier_n
 ```
 
 ### Training
+
 ```bash
 # Usage:
 # python train.py [path/to/config] 
@@ -139,6 +153,7 @@ python train_multi_gpu.py doppelgangers/configs/training_configs/doppelgangers_c
 ```
 
 ## Citation
+
 ```
 @inproceedings{cai2023doppelgangers,
   title     = {Doppelgangers: Learning to Disambiguate Images of Similar Structures},
@@ -151,24 +166,41 @@ python train_multi_gpu.py doppelgangers/configs/training_configs/doppelgangers_c
 # Running on Customized Data
 
 ## Soving Environment
-Running in a Docker Env smoothly with
+
+### Running in a Docker Env smoothly
+
 - Docker image: `pytorch/pytorch:1.12.0-cuda11.3-cudnn8-devel`
 - Env: python 3.7, pytorch 1.12, CUDA 11.3
 - Using pip with specific source
+
   ```zsh
   pip install -i https://mirrors.aliyun.com/pypi/simple/ -r requirements.txt
   ```
 
+### Setup the environment via conda
+
+```bash
+conda create -n doppelgangers python=3.9
+./setup_conda.sh doppelgangers # install Anyloc dependences
+pip install -r requirements.txt # install doppelgangers dependences
+```
+
 ## Data Preparation
+
 - Images
+
   ```bash
-  Download GV-Bench from google drive
+  TODO:
+  Download GV-Bench from google drive from comandline
+  gdown 
   ```
 
 - Image Pairs metadata `.npy`
+
   ```bash
   python tools/preprocess.py --pairs --root_dir --txt_path --npy_path 
   ```
+
   ```python
   array([
     image_0_relative_path : str,
@@ -179,6 +211,7 @@ Running in a Docker Env smoothly with
   ```
 
 - Loftr Matching Pairs `.npy`
+
   ```bash
   python tools/preprocess.py --root_dir data/GV-Bench/images \ 
     --npy_path data/GV-Bench/pairs_metadata/day.npy \
@@ -186,11 +219,14 @@ Running in a Docker Env smoothly with
     --weights weights/outdoor_ds.ckpt \
     --loftr
   ```
+
   ```bash
   {name}.npy
   name is the order of pairs in image pairs metadata
   ```
+
 - Pretrained Model
+
   ```bash
   # use pretrained models in original release
   # configs in doppelgangers/config/gvbench
@@ -217,8 +253,11 @@ Running in a Docker Env smoothly with
   | Doppelgangers| 97.056| 60.759| 99.134| 99.574|
 
 ## Fintune or train from scratch
+
 ### Train from scratch (on Pittsburgh250k dataset)
-#### Steps:
+
+#### Steps
+
 - Split the original Pittsburgh250k dataset via [VPR-datasets-downloader](https://github.com/gmberton/VPR-datasets-downloader) in `train`, `val` and `test`.
 - Generate visually similar pairs via [AnyLoc(RAL2023)](https://anyloc.github.io/)
 - Pre-process the data as listed in [Data Preparation section](#data-preparation) above.
@@ -261,4 +300,5 @@ Two types of pairs FPs (False Positives) and FNs (False Negatives) are what we a
   3. `recalls_{topk}.npy`: Recalls for topk retrieval.
 
 - Generate training pairs from retrieved candidates.
+  
   
