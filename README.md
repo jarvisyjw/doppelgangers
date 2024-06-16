@@ -1,4 +1,6 @@
 # Doppelgangers: Learning to Disambiguate Images of Similar Structures
+[Running on Customized Data](#running-on-customized-data)
+[Experiments On Pre-trained Model]()
 
 [Ruojin Cai](https://www.cs.cornell.edu/~ruojin/)<sup>1</sup>, 
 [Joseph Tung]()<sup>1</sup>, 
@@ -145,7 +147,6 @@ python train_multi_gpu.py doppelgangers/configs/training_configs/doppelgangers_c
   year      = {2023}
 }
 ```
-
 
 # Running on Customized Data
 
