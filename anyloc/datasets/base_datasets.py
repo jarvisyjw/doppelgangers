@@ -32,11 +32,12 @@ class BaseDataset(Dataset):
                 max_img_size=1024, 
                 positive_dist_threshold= 25,
                 output_path = None):
+        
             super().__init__()
             self.dataset_name = dataset_name
             self.dataset_folder = Path(datasets_folder, dataset_name)
             if output_path is not None:
-                self.output_path = Path(self.dataset_folder, output, split)
+                self.output_path = Path(self.dataset_folder, output_path, split)
             else:
                 self.output_path = None
             self.dataset_folder = Path(self.dataset_folder, "images", split)
@@ -55,6 +56,9 @@ class BaseDataset(Dataset):
                   raise FileNotFoundError(f"Folder {self.queries_folder} does not exist")
             self.database_paths = natsorted(self.database_folder.glob(f"*.{_ext}"))
             self.queries_paths = natsorted(self.queries_folder.glob(f"*.{_ext}"))
+            # descriptors
+            self.database_descs = natsorted(self.database_folder.glob(f"*.npy"))
+            self.queries_descs = natsorted(self.queries_folder.glob(f"*.npy"))
             
             self.database_utms, self.queries_utms, \
                   self.soft_positives_per_query = \
@@ -173,19 +177,23 @@ class BaseDataset(Dataset):
         return self.database_paths
     
     def get_queries_descs(self):
+        assert self.queries_descs is not None, "Database descriptors not loaded."
         return self.queries_descs
     
     def get_database_descs(self):
+        assert self.database_descs is not None, "Database descriptors not loaded."
         return self.database_descs
     
     def get_database_descs_tensor(self):
+        assert self.database_descs is not None, "Database descriptors not loaded."
         return BaseDataset.build_tensor_from_descs(self.database_descs)
     
     def get_queries_descs_tensor(self):
+        assert self.queries_descs is not None, "Queries descriptors not loaded."
         return BaseDataset.build_tensor_from_descs(self.queries_descs)
     
     def get_queries_positives(self):
-        print("Getting positives...")
+        print("Loading positives per query......")
         return self.soft_positives_per_query
             
 
@@ -196,7 +204,7 @@ def get_dataset(cfg):
                         _ext=cfg.image_ext,
                         max_img_size=cfg.max_img_size,
                         positive_dist_threshold=cfg.positive_dist_threshold,
-                        cached=cfg.cached)
+                        output_path=cfg.output_path)
     return dataset
 
 def get_dataloader(cfg):

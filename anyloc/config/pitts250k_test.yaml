@@ -1,7 +1,7 @@
 data:
   # dataset config
   type: anyloc.datasets.base_datasets
-  split: val
+  split: test
   dataset_name: pitts250k
   dataset_folder: data/
   output_path: retrieval_results/

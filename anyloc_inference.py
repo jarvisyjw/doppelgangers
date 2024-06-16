@@ -155,10 +155,11 @@ def retrieve(cfg):
     # save_path
     save_path = dataset.get_output_path()
     # save dists (similarity), indices (retrieved indices), recalls (recall)
-    topk = max(cfg.top_k)
+    topk = max(cfg.topk)
     np.save(save_path/f'dists_{topk}.npy', dists)
     np.save(save_path/f'indices_{topk}.npy', indices)
     np.save(save_path/f'recalls_{topk}.npy', recalls)
+    print(f"Recalls: {recalls}")
     
 if __name__ == "__main__":
     args, cfg = parser()

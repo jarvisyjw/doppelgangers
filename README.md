@@ -1,6 +1,6 @@
 # Doppelgangers: Learning to Disambiguate Images of Similar Structures
-[Running on Customized Data](#running-on-customized-data)
-[Experiments On Pre-trained Model]()
+[[Running on Customized Data]](#running-on-customized-data)
+[[Experiments On Pre-trained Model]](#exp-results)
 
 [Ruojin Cai](https://www.cs.cornell.edu/~ruojin/)<sup>1</sup>, 
 [Joseph Tung]()<sup>1</sup>, 
@@ -199,45 +199,63 @@ Running in a Docker Env smoothly with
   python tools/eval_helper.py --pr --val_logs /path/to/val/logs
   # The PR-Curve will be saved at the val_log folder
   ```
-  Exp results:
+
+## Exp results
   
-  MR%
+- Max Recall @100Precision (MR%)
   | Method | Day | Night| Season| Weather|
   | :------|:----|:-----|:------|:-------|
   | GV (SP+SG)|**48.267**|**30.609**|**66.514**|**74.633**|
   | GV (LoFTR)|45.336|18.206|12.096|18.206|
   | Doppelgangers| 35.465| 1.991| 22.435| 30.011|
 
-  AP%
+- Average Precision (AP%)
   | Method | Day | Night| Season| Weather|
   | :------|:----|:-----|:------|:-------|
   | GV (SP+SG)|**99.634**|95.969|99.911|**99.907**|
   | GV (LoFTR)|99.500|**97.881**|**99.874** | 97.881|
   | Doppelgangers| 97.056| 60.759| 99.134| 99.574|
 
+## Fintune or train from scratch
+### Train from scratch (on Pittsburgh250k dataset)
+#### Steps:
+- Split the original Pittsburgh250k dataset via [VPR-datasets-downloader](https://github.com/gmberton/VPR-datasets-downloader) in `train`, `val` and `test`.
+- Generate visually similar pairs via [AnyLoc(RAL2023)](https://anyloc.github.io/)
+- Pre-process the data as listed in [Data Preparation section](#data-preparation) above.
+- Train the model and validate.
+- Evaluation on `test` set and `GV-Bench`.
 
-- Fintune or train from scratch
-  - Train from scratch on Pittsburgh250k dataset (Test on GV-Bench)
-    ```bash
-    |---database
-    |---datasets
-    |---groundtruth
-    |---queries_real
-    poses.txt
-    readGt.m
-    ```
-  - Generate visually similar pairs
-    
-    Two types of pairs FPs (False Positives) and FNs (False Negatives) are what we are interested in.
-    We proposed to use anyloc (RAL 2023) to generate hard pairs for training.
-    A mini running script for extracting anyloc descriptor is implemented as `anyloc_mini.py`.
-    ```bash
-    python anyloc_mini.py
-    
-    ```
+#### Dataset Download and Preparation
+
+Follow the instructions in [VPR-datasets-downloader](https://github.com/gmberton/VPR-datasets-downloader).
+
+<p align="center">
+    <img src="assets/map_pitts250k.png" width="320"/>
+</p>
+
+#### Generate visually similar pairs
+
+Two types of pairs FPs (False Positives) and FNs (False Negatives) are what we are interested in.
+
+##### False Positives
+
+  We proposed to use [AnyLoc(RAL2023)](https://anyloc.github.io/) to generate pairs for training.
+
+- Use AnyLoc to retrieve TopK candidates. (TopK = 200 is used)
+  - Extract AnyLoc-VLAD descriptors.
 
   ```bash
-  TODO!
+  python anyloc_inference.py anyloc/config/pitts250k_train.yaml
   ```
 
-  
+  The extracted descriptors are in the same directory where the images are stored with identical file names but `.npy` extensions.
+  - Retrieve
+
+  ```bash
+  python anyloc_inference.py anyloc/config/pitts250k_train.yaml --retrieval
+  ```
+
+  The retrieved results are in three parts:
+  1. `dists_{topk}.npy`: Distances/Similarities of topk retrievals.
+  2. `indices_{topk}.npy`: Topk retrieved database image indices.
+  3. `recalls_{topk}.npy`: Recalls for topk retrieval.
