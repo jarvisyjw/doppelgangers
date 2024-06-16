@@ -168,6 +168,7 @@ class BaseDataset(Dataset):
         return len(self.images_paths)
     
     def get_positives(self):
+        print("Loading positives per query......")
         return self.soft_positives_per_query
     
     def get_queries_paths(self):
@@ -192,9 +193,9 @@ class BaseDataset(Dataset):
         assert self.queries_descs is not None, "Queries descriptors not loaded."
         return BaseDataset.build_tensor_from_descs(self.queries_descs)
     
-    def get_queries_positives(self):
-        print("Loading positives per query......")
-        return self.soft_positives_per_query
+    # def get_queries_positives(self):
+    #     print("Loading positives per query......")
+    #     return self.soft_positives_per_query
             
 
 def get_dataset(cfg):
