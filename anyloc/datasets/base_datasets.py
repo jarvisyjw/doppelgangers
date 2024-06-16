@@ -126,7 +126,7 @@ class BaseDataset(Dataset):
         desc_tensor = []
         print('Loading descriptors...')
         for desc in tqdm(descs, total=len(descs)):
-            desc_tensor.append(np.load(desc, allow_pickle=True)[0])
+            desc_tensor.append(np.load(desc, allow_pickle=True))
         desc_tensor = torch.from_numpy(np.array(desc_tensor))
         print(f'Descriptors loaded with size: {desc_tensor.shape}')
         return desc_tensor
@@ -141,27 +141,30 @@ class BaseDataset(Dataset):
 
     def __getitem__(self, index):
         # extract descriptors
-        img = Image.open(self.images_paths[index]).convert('RGB')
-        img_dir = self.images_paths[index]
-        img = base_transform(img)
-        if max(img.shape[-2:]) > self.max_img_size:
+        try:
+            img = Image.open(self.images_paths[index]).convert('RGB')
+            img_dir = self.images_paths[index]
+            img = base_transform(img)
+            if max(img.shape[-2:]) > self.max_img_size:
+                c, h, w = img.shape
+                # Maintain aspect ratio
+                if h == max(img_pt.shape[-2:]):
+                    w = int(w * self.max_img_size / h)
+                    h = self.max_img_size
+                else:
+                    h = int(h * self.max_img_size / w)
+                    w = self.max_img_size            
+                img_pt = T.resize(img_pt, (h, w), 
+                            interpolation=T.InterpolationMode.BICUBIC)     
+            # Make image patchable (14, 14 patches)
             c, h, w = img.shape
-            # Maintain aspect ratio
-            if h == max(img_pt.shape[-2:]):
-                w = int(w * self.max_img_size / h)
-                h = self.max_img_size
-            else:
-                h = int(h * self.max_img_size / w)
-                w = self.max_img_size            
-            img_pt = T.resize(img_pt, (h, w), 
-                        interpolation=T.InterpolationMode.BICUBIC)     
-        # Make image patchable (14, 14 patches)
-        c, h, w = img.shape
-        h_new, w_new = (h // 14) * 14, (w // 14) * 14
-        img = tvf.CenterCrop((h_new, w_new))(img)
-        data = { 'img': img,
-                'img_dir': str(img_dir)
-                }
+            h_new, w_new = (h // 14) * 14, (w // 14) * 14
+            img = tvf.CenterCrop((h_new, w_new))(img)
+            data = { 'img': img,
+                    'img_dir': str(img_dir)
+                    }
+        except Exception as e:
+            print(f"Error index {index}: {e}")
         return data
     
     def __len__(self):
