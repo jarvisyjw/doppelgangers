@@ -48,9 +48,6 @@ def sift_matches(root_dir: str, image0: str, image1: str):
             good_matches.append(match[0])
         elif len(match) == 1:
             good_matches.append(match[0])
-    # for m,n in matches:
-    #     if m.distance < 0.75*n.distance:
-    #         good_matches.append(m)
     
     # fundamental matrix estimation
     point_map = np.array([
