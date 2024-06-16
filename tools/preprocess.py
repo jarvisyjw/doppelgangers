@@ -196,36 +196,70 @@ def match_pairs(retrieval, query_path, database_path, positives_per_query, pos, 
         neg += 1
     return ret, pos, neg
 
+# def pairs_from_retrieval(cfg):
+#     dataset = get_dataset(cfg.data)
+#     # get positive per query
+#     retrieval_results = np.load(cfg.pairs_from_retrieval.retrieval_results, allow_pickle=True)
+#     positives_per_query = dataset.get_positives()
+#     queries_paths = dataset.get_queries_paths()
+#     database_paths = dataset.get_database_paths()
+#     pairs = []
+#     pos = 0
+#     neg = 0
+    
+#     for i, retrievals in tqdm(enumerate(retrieval_results), total=len(retrieval_results)):
+#         for retrieval in retrievals[:20]:
+#             query = queries_paths[i]
+#             query_name = str(Path(query.parent.name, query.name))
+#             db = database_paths[retrieval]
+#             db_name = str(Path(db.parent.name, db.name))
+#             num_matches, _ = sift_matches(None, query, db)
+#             if retrieval in positives_per_query[i]:
+#                 ret = np.array([query_name, db_name, 1, num_matches], dtype=object)
+#                 pos +=1
+#             else:
+#                 ret = np.array([query_name, db_name, 0, num_matches], dtype=object)
+#                 neg += 1
+#         print(ret)
+#         pairs.append(ret)
+#     out = np.array(pairs)
+#     np.save(cfg.pairs_from_retrieval.output_path, out)
+#     print('Pairs Generation Done!')
+#     print(f'Positive Pairs: {pos}, Negative Pairs: {neg}')
+
 def pairs_from_retrieval(cfg):
     dataset = get_dataset(cfg.data)
+    txt_out = open(cfg.pairs_from_retrieval.txt_output_path, 'w')
     # get positive per query
     retrieval_results = np.load(cfg.pairs_from_retrieval.retrieval_results, allow_pickle=True)
     positives_per_query = dataset.get_positives()
     queries_paths = dataset.get_queries_paths()
     database_paths = dataset.get_database_paths()
-    pairs = []
     pos = 0
     neg = 0
-    
     for i, retrievals in tqdm(enumerate(retrieval_results), total=len(retrieval_results)):
         for retrieval in retrievals[:20]:
             query = queries_paths[i]
             query_name = str(Path(query.parent.name, query.name))
             db = database_paths[retrieval]
             db_name = str(Path(db.parent.name, db.name))
-            num_matches, _ = sift_matches(None, query, db)
+            # num_matches, _ = sift_matches(None, query, db)
             if retrieval in positives_per_query[i]:
-                ret = np.array([query_name, db_name, 1, num_matches], dtype=object)
+                txt_out.write(f'{query_name} {db_name} 1\n')
+                # ret = np.array([query_name, db_name, 1, num_matches], dtype=object)
                 pos +=1
             else:
-                ret = np.array([query_name, db_name, 0, num_matches], dtype=object)
+                txt_out.write(f'{query_name} {db_name} 0\n')
+                # ret = np.array([query_name, db_name, 0, num_matches], dtype=object)
                 neg += 1
-        print(ret)
-        pairs.append(ret)
-    out = np.array(pairs)
-    np.save(cfg.pairs_from_retrieval.output_path, out)
+        # print(ret)
+        # pairs.append(ret)
+    # out = np.array(pairs)
+    # np.save(cfg.pairs_from_retrieval.output_path, out)
+    txt_out
     print('Pairs Generation Done!')
     print(f'Positive Pairs: {pos}, Negative Pairs: {neg}')
+
 
 
 if __name__ == "__main__":
