@@ -41,14 +41,16 @@ def sift_matches(root_dir: str, image0: str, image1: str):
     # match, mutual test ratio 0.75
     bf = cv2.BFMatcher()
     matches = bf.knnMatch(des0,des1,k=2)
-    print(matches)
-    if not matches:
-        return 0, None
-    
+    # handling when there is less than 2 matches
     good_matches = []
-    for m,n in matches:
-        if m.distance < 0.75*n.distance:
-            good_matches.append(m)
+    for match in matches:
+        if len(match) == 2 and match[0].distance < 0.75 * match[1].distance:
+            good_matches.append(match[0])
+        elif len(match) == 1:
+            good_matches.append(match[0])
+    # for m,n in matches:
+    #     if m.distance < 0.75*n.distance:
+    #         good_matches.append(m)
     
     # fundamental matrix estimation
     point_map = np.array([
