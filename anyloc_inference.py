@@ -147,7 +147,7 @@ def retrieve(cfg):
     database_tensors = dataset.get_database_descs_tensor()
     query_tensors = dataset.get_queries_descs_tensor()
     # load positive database indices for each query
-    soft_positives_per_query = dataset.get_queries_positives()
+    soft_positives_per_query = dataset.get_positives()
     # get top k retrieval
     dists, indices, recalls = get_top_k_recall(cfg.topk, database_tensors, query_tensors, 
                                                soft_positives_per_query, use_gpu=False, norm_descs=True)
