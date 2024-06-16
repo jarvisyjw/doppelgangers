@@ -299,6 +299,10 @@ Two types of pairs FPs (False Positives) and FNs (False Negatives) are what we a
   2. `indices_{topk}.npy`: Topk retrieved database image indices.
   3. `recalls_{topk}.npy`: Recalls for topk retrieval.
 
-- Generate training pairs from retrieved candidates.
+- Generate training pairs from retrieved candidates. (Top20)
+  - Train Set: Positive Pairs: 68992, Negative Pairs: 87488
+  - Val Set: Positive Pairs: 69794, Negative Pairs: 82366
+  - Test Set: Positive Pairs: 73407, Negative Pairs: 92193
+
   
   
