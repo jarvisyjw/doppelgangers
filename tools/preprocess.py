@@ -210,15 +210,21 @@ def pairs_from_retrieval(cfg):
     processes = []
     
     for idx, retrievals in tqdm(enumerate(retrieval_results), total=len(retrieval_results)):
-        for i in range(cfg.pairs_from_retrieval.num_processes):
-            p = multiprocessing.Process(target=match_pairs, args=(retrievals[i], queries_paths[idx], database_paths[retrievals[i]], positives_per_query[idx], pos, neg))
-            processes.append(p)
-            p.start()
         
-        for p in processes:
-            ret, pos, neg = q.get()
+        for i in range(20):
+            ret, pos, neg = match_pairs(retrievals[i], queries_paths[idx], database_paths[retrievals[0]], positives_per_query[idx], pos, neg)
             pairs.append(ret)
-            p.join()
+        # for i in range(cfg.pairs_from_retrieval.num_processes):
+        #     p = multiprocessing.Process(target=match_pairs, args=(retrievals[i], queries_paths[idx], database_paths[retrievals[i]], positives_per_query[idx], pos, neg))
+        #     processes.append(p)
+        #     p.start()
+        
+        # for p in processes:
+        #     ret, pos, neg = q.get()
+        #     pairs.append(ret)
+            
+        # for p in processes:
+        #     p.join()
         # for retrieval in retrievals[:20]:
         #     query = queries_paths[i]
         #     query_name = str(Path(query.parent.name, query.name))

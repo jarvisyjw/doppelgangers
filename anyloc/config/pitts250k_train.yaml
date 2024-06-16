@@ -31,8 +31,7 @@ model:
   desc_facet: value # 'query', 'key', 'value', 'token'
 
 pairs_from_retrieval:
-  num_processes: 20
   retrieval_results: data/pitts250k/retrieval_results/train/indices_200.npy
-  output_path: data/pitts250k/retrieval_results/train/pairs_200.npy
+  output_path: data/pitts250k/retrieval_results/train/pairs_20.npy
 
   
