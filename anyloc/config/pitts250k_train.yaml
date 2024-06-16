@@ -33,5 +33,6 @@ model:
 pairs_from_retrieval:
   retrieval_results: data/pitts250k/retrieval_results/train/indices_200.npy
   output_path: data/pitts250k/retrieval_results/train/pairs_20.npy
+  txt_output_path: data/pitts250k/retrieval_results/train/pairs_20.txt
 
   

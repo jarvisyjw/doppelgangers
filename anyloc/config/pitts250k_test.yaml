@@ -8,7 +8,6 @@ data:
   image_ext: jpg
   max_img_size: 1024 # Maximum edge length (expected) across all images (GPU OOM)
   positive_dist_threshold: 25
-  # dataloader config only used when cached is False
   num_workers: 4
   batch_size: 8
   shuffle: False
@@ -29,4 +28,8 @@ model:
   num_c: 32 # num of cluster in VLAD
   desc_layer: 31 # layer of descriptor
   desc_facet: value # 'query', 'key', 'value', 'token'
-  
+
+pairs_from_retrieval:
+  retrieval_results: data/pitts250k/retrieval_results/test/indices_200.npy
+  output_path: data/pitts250k/retrieval_results/test/pairs_20.npy
+  txt_output_path: data/pitts250k/retrieval_results/test/pairs_20.txt
