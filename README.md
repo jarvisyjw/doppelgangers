@@ -259,3 +259,6 @@ Two types of pairs FPs (False Positives) and FNs (False Negatives) are what we a
   1. `dists_{topk}.npy`: Distances/Similarities of topk retrievals.
   2. `indices_{topk}.npy`: Topk retrieved database image indices.
   3. `recalls_{topk}.npy`: Recalls for topk retrieval.
+
+- Generate training pairs from retrieved candidates.
+  

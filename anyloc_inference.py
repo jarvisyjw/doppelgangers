@@ -136,7 +136,6 @@ def extract_gdesc(cfg):
             img_dirs = data['img_dir']
             gd_batch = model(img) # shape: [batch_size, agg_dim], numpy.array()
             # Save the global descriptor to the save dir of images
-            print(gd_batch.shape)
             for idx, img_dir in enumerate(img_dirs):
                 img_dir = Path(img_dir)
                 np.save(f'{img_dir.parent/img_dir.stem}.npy', gd_batch[idx])
