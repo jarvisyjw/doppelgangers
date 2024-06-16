@@ -3,3 +3,4 @@ weights/*
 __pycache__
 val_logs/*
 logs/*
+debug.py
