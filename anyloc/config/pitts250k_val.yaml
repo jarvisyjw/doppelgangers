@@ -32,7 +32,7 @@ model:
 
 pairs_from_retrieval:
   retrieval_results: data/pitts250k/retrieval_results/val/indices_200.npy
-  output_path: data/pitts250k/retrieval_results/val/pairs_20.npy
+  output_path: data/pitts250k/retrieval_results/val/pairs_info_20.npy
   txt_output_path: data/pitts250k/retrieval_results/val/pairs_20.txt
   pairs_info: data/pitts250k/retrieval_results/val/pairs_info_20.npy
   sift_path: data/pitts250k/features/val/sift.h5
