@@ -13,6 +13,7 @@ sys.path.append('../anyloc')
 from anyloc.datasets.base_datasets import get_dataset
 from doppelgangers.utils.loftr_matches import save_loftr_matches
 from hloc import extract_features, match_features, match_dense
+from hloc.utils.io import get_matches
 
 def sift_matches(root_dir: str, image0: str, image1: str):
     '''SIFT extraction
@@ -141,13 +142,32 @@ def split_data(all_pairs: str, split_pairs: str, length):
 
 def main_worker(cfg):
     # Step1: Pairs from retreival
+    print('Generating pairs from retrieval results......')
+    pairs_from_retrieval(cfg)
     # Step2: Extract sift features
+    print('Extracting sift features......')
+    conf = extract_features.confs['sift']
+    extract_features.main(conf, Path(cfg.pairs_from_retrieval.image_path), 
+                          feature_path = Path(cfg.pairs_from_retrieval.sift_path))
     # Step3: Matching sift features
-    match_features.main(match_features.confs['NN-ratio'], pairs = Path(cfg.pairs), features= Path(args.features, f'{feature}.h5'), matches= Path(args.output_path, f'{Path(args.pairs).stem}_{feature}_NN.h5'))
-
-    
-        
-
+    print('Matching sift features......')
+    match_features.main(match_features.confs['NN-ratio'], 
+                        pairs = Path(cfg.pairs_from_retrieval.txt_output_path), 
+                        features= Path(cfg.pairs_from_retrieval.sift_path), 
+                        matches= Path(cfg.pairs_from_retrieval.matches_path))
+    # Step4: Generate pairs_info npy
+    txt_in = open(cfg.pairs_from_retrieval.txt_output_path, 'r')
+    npy_out = cfg.pairs_from_retrieval.pairs_info
+    pairs_info = []
+    lines = txt_in.readlines()
+    for line in tqdm(lines):
+        image0, image1, label = line.strip('\n').split(' ')
+        matches, scores = get_matches(cfg.pairs_from_retrieval.matches_path, image0, image1)
+        num_matches, _ = len(matches)
+        pairs_info.append(np.array([str(image0), str(image1), int(label), num_matches], dtype=object))
+    out = np.array(pairs_info)
+    np.save(npy_out, out)
+    print('Done!')
 
 def parser():
     parser = argparse.ArgumentParser(description='preprocessing tools')
@@ -259,15 +279,9 @@ def pairs_from_retrieval(cfg):
                 txt_out.write(f'{query_name} {db_name} 0\n')
                 # ret = np.array([query_name, db_name, 0, num_matches], dtype=object)
                 neg += 1
-        # print(ret)
-        # pairs.append(ret)
-    # out = np.array(pairs)
-    # np.save(cfg.pairs_from_retrieval.output_path, out)
-    txt_out
+    txt_out.close()
     print('Pairs Generation Done!')
     print(f'Positive Pairs: {pos}, Negative Pairs: {neg}')
-
-
 
 if __name__ == "__main__":
     args, cfg = parser()
@@ -280,7 +294,7 @@ if __name__ == "__main__":
                 txt2npy(args.root_dir, args.txt_path, args.npy_path)
         else:
             # Process pairs from retreival results.
-            pairs_from_retrieval(cfg)
+            main_worker(cfg)
 
     # Step 2: Extract loftr matches
     if args.loftr:
