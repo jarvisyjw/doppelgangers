@@ -30,13 +30,17 @@ class BaseDataset(Dataset):
                 dataset_name="pitts250k",
                 split="train", _ext="jpg",
                 max_img_size=1024, 
-                positive_dist_threshold= 25, 
-                cached = False):
+                positive_dist_threshold= 25,
+                output_path = None):
             super().__init__()
-            self.cached = cached
             self.dataset_name = dataset_name
             self.dataset_folder = Path(datasets_folder, dataset_name)
+            if output_path is not None:
+                self.output_path = Path(self.dataset_folder, output, split)
+            else:
+                self.output_path = None
             self.dataset_folder = Path(self.dataset_folder, "images", split)
+            
             database_folder_name, queries_folder_name = "database", "queries"
             if not self.dataset_folder.exists():
                   raise FileNotFoundError(f"Folder {self.dataset_folder} does not exist")
@@ -51,10 +55,6 @@ class BaseDataset(Dataset):
                   raise FileNotFoundError(f"Folder {self.queries_folder} does not exist")
             self.database_paths = natsorted(self.database_folder.glob(f"*.{_ext}"))
             self.queries_paths = natsorted(self.queries_folder.glob(f"*.{_ext}"))
-            # if cached, load descriptors
-            if self.cached:
-                self.database_descs = natsorted(self.database_folder.glob("*.npy"))
-                self.queries_descs = natsorted(self.queries_folder.glob("*.npy"))
             
             self.database_utms, self.queries_utms, \
                   self.soft_positives_per_query = \
@@ -127,42 +127,38 @@ class BaseDataset(Dataset):
         print(f'Descriptors loaded with size: {desc_tensor.shape}')
         return desc_tensor
 
+    def get_output_path(self):
+        if self.output_path is None:
+            raise ValueError("Output path is not set")
+        return self.output_path
+    
     def get_image_paths(self):
         return self.images_paths
 
     def __getitem__(self, index):
-        if self.cached:
-            # load descriptors
-            query_desc = np.load(self.queries_descs[index], allow_pickle=True)
-            postives = self.soft_positives_per_query[index]
-            data = { 'query_desc': torch.from_numpy(query_desc),
-                     'pos_idx': postives
-                    }
-            return data
-        else:
-            # extract descriptors
-            img = Image.open(self.images_paths[index]).convert('RGB')
-            img_dir = self.images_paths[index]
-            img = base_transform(img)
-            if max(img.shape[-2:]) > self.max_img_size:
-                c, h, w = img.shape
-                # Maintain aspect ratio
-                if h == max(img_pt.shape[-2:]):
-                    w = int(w * self.max_img_size / h)
-                    h = self.max_img_size
-                else:
-                    h = int(h * self.max_img_size / w)
-                    w = self.max_img_size            
-                img_pt = T.resize(img_pt, (h, w), 
-                            interpolation=T.InterpolationMode.BICUBIC)     
-            # Make image patchable (14, 14 patches)
+        # extract descriptors
+        img = Image.open(self.images_paths[index]).convert('RGB')
+        img_dir = self.images_paths[index]
+        img = base_transform(img)
+        if max(img.shape[-2:]) > self.max_img_size:
             c, h, w = img.shape
-            h_new, w_new = (h // 14) * 14, (w // 14) * 14
-            img = tvf.CenterCrop((h_new, w_new))(img)
-            data = { 'img': img,
-                    'img_dir': str(img_dir)
-                    }
-            return data
+            # Maintain aspect ratio
+            if h == max(img_pt.shape[-2:]):
+                w = int(w * self.max_img_size / h)
+                h = self.max_img_size
+            else:
+                h = int(h * self.max_img_size / w)
+                w = self.max_img_size            
+            img_pt = T.resize(img_pt, (h, w), 
+                        interpolation=T.InterpolationMode.BICUBIC)     
+        # Make image patchable (14, 14 patches)
+        c, h, w = img.shape
+        h_new, w_new = (h // 14) * 14, (w // 14) * 14
+        img = tvf.CenterCrop((h_new, w_new))(img)
+        data = { 'img': img,
+                'img_dir': str(img_dir)
+                }
+        return data
     
     def __len__(self):
         return len(self.images_paths)

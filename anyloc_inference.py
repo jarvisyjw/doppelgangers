@@ -147,12 +147,18 @@ def retrieve(cfg):
     # build database and query tensors
     database_tensors = dataset.get_database_descs_tensor()
     query_tensors = dataset.get_queries_descs_tensor()
+    # load positive database indices for each query
     soft_positives_per_query = dataset.get_queries_positives()
+    # get top k retrieval
     dists, indices, recalls = get_top_k_recall(cfg.topk, database_tensors, query_tensors, 
                                                soft_positives_per_query, use_gpu=False, norm_descs=True)
-    print(f'dists: {dists}')
-    print(f'indices: {indices}')
-    print(f'recalls: {recalls}')
+    # save_path
+    save_path = dataset.get_output_path()
+    # save dists (similarity), indices (retrieved indices), recalls (recall)
+    topk = max(cfg.top_k)
+    np.save(save_path/f'dists_{topk}.npy', dists)
+    np.save(save_path/f'indices_{topk}.npy', indices)
+    np.save(save_path/f'recalls_{topk}.npy', recalls)
     
 if __name__ == "__main__":
     args, cfg = parser()
