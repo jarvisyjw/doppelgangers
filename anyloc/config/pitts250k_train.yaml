@@ -29,4 +29,9 @@ model:
   num_c: 32 # num of cluster in VLAD
   desc_layer: 31 # layer of descriptor
   desc_facet: value # 'query', 'key', 'value', 'token'
+
+pairs_from_retrieval:
+  retrieval_results: data/pitts250k/retrieval_results/train/indices_200.npy
+  output_path: data/pitts250k/retrieval_results/train/pairs_200.npy
+
   
