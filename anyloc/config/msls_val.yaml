@@ -1,16 +1,16 @@
 data:
   # dataset config
   type: anyloc.datasets.base_datasets
-  split: train
-  dataset_name: pitts250k
+  split: val
+  dataset_name: msls
   dataset_folder: data/
   output_path: retrieval_results/
   image_ext: jpg
   max_img_size: 1024 # Maximum edge length (expected) across all images (GPU OOM)
   positive_dist_threshold: 25
   # dataloader config only used when cached is False
-  num_workers: 4
-  batch_size: 8
+  num_workers: 0
+  batch_size: 1
   shuffle: False
 
 topk:
@@ -31,8 +31,5 @@ model:
   desc_facet: value # 'query', 'key', 'value', 'token'
 
 pairs_from_retrieval:
-  num_processes: 20
-  retrieval_results: data/pitts250k/retrieval_results/train/indices_200.npy
-  output_path: data/pitts250k/retrieval_results/train/pairs_200.npy
-
-  
+  retrieval_results: data/msls/retrieval_results/val/indices_200.npy
+  output_path: data/msls/retrieval_results/val/pairs_200.npy
