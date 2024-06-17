@@ -6,6 +6,8 @@ import cv2
 import sys
 import yaml
 import warnings
+import time
+from concurrent.futures import ThreadPoolExecutor
 
 sys.path.append('../doppelgangers')
 sys.path.append('../anyloc')
@@ -20,28 +22,35 @@ def sift_matches(root_dir: str, image0: str, image1: str):
     '''
     if root_dir is None:
         warnings.warn("root_dir is None, assuming image0 and image1 are full paths")
+        t0 = time.time()
         image0 = cv2.imread(str(image0))
         image1 = cv2.imread(str(image1))
+        t1 = time.time()
     else:
         # read
+        t0 = time.time()
         image0 = cv2.imread(str(Path(root_dir, image0)))
         image1 = cv2.imread(str(Path(root_dir, image1)))
-    
+        t1 = time.time()
+
     if image0 is None or image1 is None:
         raise FileNotFoundError("Error: One of the images did not load.")
 
     # extract
     sift = cv2.xfeatures2d.SIFT_create()
     # sift = cv2.SIFT_create()
+    t2 = time.time()
     kp0, des0 = sift.detectAndCompute(image0, None)
     kp1, des1 = sift.detectAndCompute(image1, None)
-
+    t3 = time.time()
     if not kp0 or not kp1:
         return 0, None
     
     # match, mutual test ratio 0.75
     bf = cv2.BFMatcher()
+    t4 = time.time()
     matches = bf.knnMatch(des0,des1,k=2)
+    t5 = time.time()
     # handling when there is less than 2 matches
     good_matches = []
     for match in matches:
@@ -60,12 +69,20 @@ def sift_matches(root_dir: str, image0: str, image1: str):
     
     if point_map.shape[0] < 8:
         return 0, None
+    t6 = time.time()
     F, inliers_idx = cv2.findFundamentalMat(point_map[:, :2], point_map[:, 2:], cv2.FM_RANSAC, 3.0)
+    t7 = time.time()
     if inliers_idx is None:
         return 0, None
     inliers = point_map[inliers_idx.ravel() == 1]
+    # print(f'Total time: {t7 - t0}, read: {t1 - t0}, extract: {t3 - t2}, match: {t5 - t4}, fundamental: {t7 - t6}')
     return len(inliers), inliers
 
+def sift_matches_mp(pairs: np.array):
+    for pair in pairs:
+        image0, image1, label, num_matches = pair
+        num_matches, _ = sift_matches(None, image0, image1)
+    return None
 
 # transfer from txt to npy
 def txt2npy(root_dir, txt_file, npy_file):
@@ -87,6 +104,43 @@ def txt2npy(root_dir, txt_file, npy_file):
     
     out = np.array(pairs)
     np.save(npy_file, out)
+    print('Done!')
+
+def txt2npy_mp(root_dir, txt_file, npy_file):
+    # TODO: implement multiprocessing
+    
+    if not isinstance(txt_file, str):
+        raise TypeError('txt file path must be a str')
+    
+    if Path(npy_file).is_dir():
+        npy_file = Path(npy_file, "pairs_info.npy")
+
+    f = open(txt_file, 'r')
+    lines = f.readlines()
+    
+    start = time.time()
+    
+    pairs = []
+    missing = []
+    f = open(txt_file, 'r')
+    for line in tqdm(f.readlines()):
+        line_str = line.strip('\n').split(' ')
+        image0, image1, label = line_str
+        try:
+            num_matches = check_pair(root_dir, image0, image1)
+        except:
+            missing.append([image0, image1])
+            print("Error: ", image0, image1)
+            continue
+        line_numpy = np.array([str(image0), str(image1), int(label), num_matches], dtype=object)
+        pairs.append(line_numpy)
+
+    missing = np.array(missing)
+    out = np.array(pairs)
+    np.save(npy_file, out)
+    if len(missing) > 0:
+        print(missing.shape)
+        np.save(npy_file + ".missing", missing)
     print('Done!')
 
 
@@ -234,25 +288,105 @@ def pairs_from_retrieval(cfg):
     pairs = []
     pos = 0
     neg = 0
+    
+    for i, retrievals in tqdm(enumerate(retrieval_results), total=len(retrieval_results)):
+        t0 = time.time()
+        t_match = 0
+        for retrieval in retrievals[:20]:
+            query = queries_paths[i]
+            query_name = str(Path(query.parent.name, query.name))
+            db = database_paths[retrieval]
+            db_name = str(Path(db.parent.name, db.name))
+            t1 = time.time()
+            num_matches, _ = sift_matches(None, query, db)
+            t2 = time.time()
+            if retrieval in positives_per_query[i]:
+                ret = np.array([query_name, db_name, 1, num_matches], dtype=object)
+                pos +=1
+                t3 = time.time()
+            else:
+                ret = np.array([query_name, db_name, 0, num_matches], dtype=object)
+                neg += 1
+                t3 = time.time()
+            # print(ret)
+            pairs.append(ret)
+            t_match += t2 - t1
+        t4 = time.time()
+        print(f'Total {i} time for one sample: {t4 - t0}, match time: {t_match}')
+    out = np.array(pairs)
+    np.save(cfg.pairs_from_retrieval.pairs_info, out)
+    print('Pairs Generation Done!')
+    print(f'Positive Pairs: {pos}, Negative Pairs: {neg}')
+
+
+def pairs_from_retrieval_mp(cfg, num_cores=20):
+    # TODO: implement muti-Process/Thread acceleration version
+    dataset = get_dataset(cfg.data)
+    # get positive per query
+    retrieval_results = np.load(cfg.pairs_from_retrieval.retrieval_results, allow_pickle=True)
+    positives_per_query = dataset.get_positives()
+    queries_paths = dataset.get_queries_paths()
+    database_paths = dataset.get_database_paths()
+    pairs = []
+    pos = 0
+    neg = 0
+    t0 = time.time()
     for i, retrievals in tqdm(enumerate(retrieval_results), total=len(retrieval_results)):
         for retrieval in retrievals[:20]:
             query = queries_paths[i]
             query_name = str(Path(query.parent.name, query.name))
             db = database_paths[retrieval]
             db_name = str(Path(db.parent.name, db.name))
-            num_matches, _ = sift_matches(None, query, db)
+            # num_matches, _ = sift_matches(None, query, db)
             if retrieval in positives_per_query[i]:
-                ret = np.array([query_name, db_name, 1, num_matches], dtype=object)
+                ret = np.array([query_name, db_name, 1, 0], dtype=object)
                 pos +=1
             else:
-                ret = np.array([query_name, db_name, 0, num_matches], dtype=object)
+                ret = np.array([query_name, db_name, 0, 0], dtype=object)
                 neg += 1
             # print(ret)
             pairs.append(ret)
-    out = np.array(pairs)
+    pairs = np.array(pairs)
+    t1 = time.time()
+    print(f'Positive Pairs: {pos}, Negative Pairs: {neg}')
+    print(f'Pairs Search Done!')
+    print(f'Total time for Search: {t1 - t0}')
+    
+    print(f'Using {num_cores} cores for SIFT matching acceleration.')
+    # pairs = pairs[:100]
+    pairs_list = [pairs[i::num_cores] for i in range(num_cores)]
+    print('Matching images using multi-thread...')
+    # Matching image using multi-thread
+    
+    # def load_image_pair(pair: np.array, root_dir: str):
+    #     image0, image1, label, num_matches = pair
+    #     image0 = cv2.imread(str(Path(root_dir, image0)))
+    #     image1 = cv2.imread(str(Path(root_dir, image1)))
+    #     if image0 is None or image1 is None:
+    #         raise FileNotFoundError("Error: One of the images did not load.")
+    #     return image0, image1
+    
+    def match_image_pairs(pairs:np.array, root_dir = cfg.pairs_from_retrieval.image_root):
+        image_pairs = []
+        for pair in tqdm(pairs):
+            num_matches, _ = sift_matches(root_dir, pair[0], pair[1])
+            line = np.array([pair[0], pair[1], pair[2], num_matches], dtype=object)
+            # image0, image1 = load_image_pair(pair, root_dir)
+            image_pairs.append(line)
+        return image_pairs
+    
+    start = time.time()
+    with ThreadPoolExecutor(max_workers=num_cores) as executor:
+        image_pairs = list(executor.map(match_image_pairs, pairs_list))
+    end = time.time()
+    
+    print(f'Matching image time: {end - start}')
+    
+    out = np.concatenate(image_pairs)
     np.save(cfg.pairs_from_retrieval.pairs_info, out)
     print('Pairs Generation Done!')
     print(f'Positive Pairs: {pos}, Negative Pairs: {neg}')
+
 
 # def pairs_from_retrieval(cfg):
 #     dataset = get_dataset(cfg.data)
@@ -297,7 +431,8 @@ if __name__ == "__main__":
         else:
             # Process pairs from retreival results.
             # main_worker(cfg)
-            pairs_from_retrieval(cfg)
+            # pairs_from_retrieval(cfg)
+            pairs_from_retrieval_mp(cfg)
 
     # Step 2: Extract loftr matches
     if args.loftr:
