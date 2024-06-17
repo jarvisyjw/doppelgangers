@@ -173,11 +173,12 @@ def parser():
     parser = argparse.ArgumentParser(description='preprocessing tools')
     parser.add_argument('config', type=str,
                         help='The configuration file.')
-    parser.add_argument('--npy_path', default='data/train.npy', type=str, help='npy path')
-    parser.add_argument('--txt_path', default='data/train.txt', type=str, help='txt path')
-    parser.add_argument('--root_dir')
-    parser.add_argument('--output')
-    parser.add_argument('--weights')
+    # parser.add_argument('--npy_path', default='data/train.npy', type=str, help='npy path')
+    # parser.add_argument('--txt_path', default='data/train.txt', type=str, help='txt path')
+    # parser.add_argument('--root_dir')
+    # parser.add_argument('--output')
+    # parser.add_argument('--weights')
+    
     parser.add_argument('--loftr', action='store_true')
     parser.add_argument('--pairs', action='store_true')
     parser.add_argument('--txt', action='store_true')
@@ -246,10 +247,10 @@ def pairs_from_retrieval(cfg):
             else:
                 ret = np.array([query_name, db_name, 0, num_matches], dtype=object)
                 neg += 1
-        print(ret)
-        pairs.append(ret)
+            # print(ret)
+            pairs.append(ret)
     out = np.array(pairs)
-    np.save(cfg.pairs_from_retrieval.output_path, out)
+    np.save(cfg.pairs_from_retrieval.pairs_info, out)
     print('Pairs Generation Done!')
     print(f'Positive Pairs: {pos}, Negative Pairs: {neg}')
 
@@ -287,10 +288,12 @@ if __name__ == "__main__":
     # Step 1: Generate pairs meta info
     if args.pairs:
         if args.txt:
-            if Path(args.npy_path).is_file():
+            conf = cfg.pairs_from_retrieval
+            if Path(conf.pairs_info).is_file():
                 raise Warning('npy file already exists, skip generation.')
             else:
-                txt2npy(args.root_dir, args.txt_path, args.npy_path)
+                conf = cfg.pairs_from_retrieval
+                txt2npy(conf.image_root, conf.txt_path, conf.pairs_info)
         else:
             # Process pairs from retreival results.
             # main_worker(cfg)
@@ -305,4 +308,5 @@ if __name__ == "__main__":
             --output: str, output directory to save the loftr matches
             --weights: str, path to the loftr weights
         '''
-        save_loftr_matches(args.root_dir, args.npy_path, args.output, args.weights)
+        conf = cfg.pairs_from_retrieval
+        save_loftr_matches(conf.image_root, conf.pairs_info, conf.loftr_output, conf.loftr_weights)
