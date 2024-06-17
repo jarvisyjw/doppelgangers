@@ -12,8 +12,8 @@ sys.path.append('../anyloc')
 
 from anyloc.datasets.base_datasets import get_dataset
 from doppelgangers.utils.loftr_matches import save_loftr_matches
-from hloc import extract_features, match_features, match_dense
-from hloc.utils.io import get_matches
+# from hloc import extract_features, match_features, match_dense
+# from hloc.utils.io import get_matches
 
 def sift_matches(root_dir: str, image0: str, image1: str):
     '''SIFT extraction
@@ -140,34 +140,34 @@ def split_data(all_pairs: str, split_pairs: str, length):
         split_list = all_list[:length]
         np.save(split_pairs, split_list)
 
-def main_worker(cfg):
-    # Step1: Pairs from retreival
-    print('Generating pairs from retrieval results......')
-    pairs_from_retrieval(cfg)
-    # Step2: Extract sift features
-    print('Extracting sift features......')
-    conf = extract_features.confs['sift']
-    extract_features.main(conf, Path(cfg.pairs_from_retrieval.image_path), 
-                          feature_path = Path(cfg.pairs_from_retrieval.sift_path))
-    # Step3: Matching sift features
-    print('Matching sift features......')
-    match_features.main(match_features.confs['NN-ratio'], 
-                        pairs = Path(cfg.pairs_from_retrieval.txt_output_path), 
-                        features= Path(cfg.pairs_from_retrieval.sift_path), 
-                        matches= Path(cfg.pairs_from_retrieval.matches_path))
-    # Step4: Generate pairs_info npy
-    txt_in = open(cfg.pairs_from_retrieval.txt_output_path, 'r')
-    npy_out = cfg.pairs_from_retrieval.pairs_info
-    pairs_info = []
-    lines = txt_in.readlines()
-    for line in tqdm(lines):
-        image0, image1, label = line.strip('\n').split(' ')
-        matches, scores = get_matches(cfg.pairs_from_retrieval.matches_path, image0, image1)
-        num_matches, _ = len(matches)
-        pairs_info.append(np.array([str(image0), str(image1), int(label), num_matches], dtype=object))
-    out = np.array(pairs_info)
-    np.save(npy_out, out)
-    print('Done!')
+# def main_worker(cfg):
+#     # Step1: Pairs from retreival
+#     print('Generating pairs from retrieval results......')
+#     pairs_from_retrieval(cfg)
+#     # Step2: Extract sift features
+#     print('Extracting sift features......')
+#     conf = extract_features.confs['sift']
+#     extract_features.main(conf, Path(cfg.pairs_from_retrieval.image_path), 
+#                           feature_path = Path(cfg.pairs_from_retrieval.sift_path))
+#     # Step3: Matching sift features
+#     print('Matching sift features......')
+#     match_features.main(match_features.confs['NN-ratio'], 
+#                         pairs = Path(cfg.pairs_from_retrieval.txt_output_path), 
+#                         features= Path(cfg.pairs_from_retrieval.sift_path), 
+#                         matches= Path(cfg.pairs_from_retrieval.matches_path))
+#     # Step4: Generate pairs_info npy
+#     txt_in = open(cfg.pairs_from_retrieval.txt_output_path, 'r')
+#     npy_out = cfg.pairs_from_retrieval.pairs_info
+#     pairs_info = []
+#     lines = txt_in.readlines()
+#     for line in tqdm(lines):
+#         image0, image1, label = line.strip('\n').split(' ')
+#         matches, scores = get_matches(cfg.pairs_from_retrieval.matches_path, image0, image1)
+#         num_matches, _ = len(matches)
+#         pairs_info.append(np.array([str(image0), str(image1), int(label), num_matches], dtype=object))
+#     out = np.array(pairs_info)
+#     np.save(npy_out, out)
+#     print('Done!')
 
 def parser():
     parser = argparse.ArgumentParser(description='preprocessing tools')
@@ -233,7 +233,6 @@ def pairs_from_retrieval(cfg):
     pairs = []
     pos = 0
     neg = 0
-    
     for i, retrievals in tqdm(enumerate(retrieval_results), total=len(retrieval_results)):
         for retrieval in retrievals[:20]:
             query = queries_paths[i]
