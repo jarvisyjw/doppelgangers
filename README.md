@@ -303,6 +303,18 @@ Two types of pairs FPs (False Positives) and FNs (False Negatives) are what we a
   - Train Set: Positive Pairs: 68992, Negative Pairs: 87488
   - Val Set: Positive Pairs: 69794, Negative Pairs: 82366
   - Test Set: Positive Pairs: 73407, Negative Pairs: 92193
+  
+### Tokyo247 dataset
 
+#### Dataset Download and Preparation
+
+Follow the instructions in [VPR-datasets-downloader](https://github.com/gmberton/VPR-datasets-downloader).
+
+<p align="center">
+    <img src="assets/map_tokyo247.png" width="420"/>
+</p>
+
+- Use AnyLoc to Retrieve TopK candidates
+  
   
   

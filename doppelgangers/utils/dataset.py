@@ -139,7 +139,7 @@ def read_loftr_matches(path0, path1,
 
     # Concatenate keypoint and match masks with images.
     image1 = cv2.resize(image1, (w_new1, h_new1))
-    image1 = np.transpose(image1, (2,0,1))        
+    image1 = np.transpose(image1, (2,0,1))
     rgb_image = np.zeros((6, keypoint_match_mask.shape[1], keypoint_match_mask.shape[2]), dtype=np.float32)
     rgb_image[:3,:h_new1,:w_new1] = image1/255.
     if matches is not None and warp_rgb==True:

@@ -8,11 +8,11 @@ data:
     img_size: 1024
     pair_path: ['data/doppelgangers_dataset/doppelgangers/pairs_metadata/train_pairs_flip.npy', 'data/doppelgangers_dataset/doppelgangers/pairs_metadata/train_pairs_megadepth.npy']
   test:
-    image_dir: ['data/doppelgangers_dataset/doppelgangers/images/test_set/']
-    loftr_match_dir: ['data/doppelgangers_dataset/doppelgangers/loftr_matches/test_set/']
+    image_dir: ['data/pitts250k/images/val']
+    loftr_match_dir: ['data/pitts250k/retrieval_results/val/loftr_matches']
     batch_size: 8
     img_size: 1024
-    pair_path: ['data/doppelgangers_dataset/doppelgangers/pairs_metadata/test_pairs.npy']
+    pair_path: ['data/pitts250k/retrieval_results/val/pairs_info_20.npy']
 
 models:
   decoder:
