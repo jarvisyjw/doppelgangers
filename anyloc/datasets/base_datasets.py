@@ -19,6 +19,17 @@ base_transform = T.Compose([
     T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
+def get_resized_wh(w, h, resize=None):
+    if resize is not None:  # resize the longer edge
+        scale = resize / max(w, h)
+        if h == max(w, h):
+            w_new, h_new = int(round(h*scale)), int(round(w*scale))
+        else:
+            w_new, h_new = int(round(w*scale)), int(round(h*scale))
+    else:
+        w_new, h_new = w, h
+    return w_new, h_new
+
 class BaseDataset(Dataset):
     """Dataset with images from database and queries, 
       used for inference (testing and building cache).
@@ -29,13 +40,15 @@ class BaseDataset(Dataset):
     def __init__(self, datasets_folder="data", 
                 dataset_name="pitts250k",
                 split="train", _ext="jpg",
-                max_img_size=1024, 
+                max_img_size=1024,
                 positive_dist_threshold= 25,
+                resize = None,
                 output_path = None):
         
             super().__init__()
             self.dataset_name = dataset_name
             self.dataset_folder = Path(datasets_folder, dataset_name)
+            self.resize = resize
             if output_path is not None:
                 self.output_path = Path(self.dataset_folder, output_path, split)
             else:
@@ -143,18 +156,23 @@ class BaseDataset(Dataset):
         # extract descriptors
         try:
             img = Image.open(self.images_paths[index]).convert('RGB')
+            w, h = img.size
             img_dir = self.images_paths[index]
+            if self.resize is not None:
+                w_new, h_new = self.resize
+                # w_new, h_new = get_resized_wh(w, h, self.resize)
+                img = img.resize((w_new, h_new))
             img = base_transform(img)
             if max(img.shape[-2:]) > self.max_img_size:
                 c, h, w = img.shape
                 # Maintain aspect ratio
-                if h == max(img_pt.shape[-2:]):
+                if h == max(img.shape[-2:]):
                     w = int(w * self.max_img_size / h)
                     h = self.max_img_size
                 else:
                     h = int(h * self.max_img_size / w)
                     w = self.max_img_size            
-                img_pt = T.resize(img_pt, (h, w), 
+                img = T.resize(img, (h, w), 
                             interpolation=T.InterpolationMode.BICUBIC)     
             # Make image patchable (14, 14 patches)
             c, h, w = img.shape
@@ -207,6 +225,7 @@ def get_dataset(cfg):
                         split=cfg.split,
                         _ext=cfg.image_ext,
                         max_img_size=cfg.max_img_size,
+                        resize=cfg.resize,
                         positive_dist_threshold=cfg.positive_dist_threshold,
                         output_path=cfg.output_path)
     return dataset

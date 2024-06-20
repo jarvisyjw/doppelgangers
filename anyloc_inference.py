@@ -130,15 +130,22 @@ def extract_gdesc(cfg):
     loader = data.get_dataloader(cfg.data)
     model = importlib.import_module(cfg.model.type)
     model = model.get_model(cfg.model)
+    # save_dir = Path(cfg.data.desc_path)
     with torch.no_grad():
         for idx, data in tqdm(enumerate(loader), total=len(loader)):
             img = data['img']
             img_dirs = data['img_dir']
+            # check if the image descriptors are already saved
+            gd_dirs_list = [f'{Path(img_dir).parent/Path(img_dir).stem}.npy' for idx, img_dir in enumerate(img_dirs)]
+            if all([Path(img_dir).exists() for img_dir in gd_dirs_list]):
+                continue
+            # if not, save the descriptors
             gd_batch = model(img) # shape: [batch_size, agg_dim], numpy.array()
             # Save the global descriptor to the save dir of images
-            for idx, img_dir in enumerate(img_dirs):
-                img_dir = Path(img_dir)
-                np.save(f'{img_dir.parent/img_dir.stem}.npy', gd_batch[idx])
+            for idx, gd_dir in enumerate(gd_dirs_list):
+                np.save(gd_dir, gd_batch[idx])
+                # img_dir = Path(img_dir)
+                # np.save(f'{img_dir.parent/img_dir.stem}.npy', gd_batch[idx])
 
 def retrieve(cfg):
     # load dataset for gt

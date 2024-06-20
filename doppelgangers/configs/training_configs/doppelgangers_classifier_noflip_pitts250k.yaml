@@ -4,13 +4,13 @@ data:
   train:
     image_dir: ['data/pitts250k/images/train']
     loftr_match_dir: ['data/pitts250k/retrieval_results/train/loftr_matches']
-    batch_size: 8
+    batch_size: 16
     img_size: 1024
     pair_path: ['data/pitts250k/retrieval_results/train/pairs_info_20.npy']
   test:
     image_dir: ['data/pitts250k/images/val']
     loftr_match_dir: ['data/pitts250k/retrieval_results/val/loftr_matches']
-    batch_size: 8
+    batch_size: 16
     img_size: 1024
     pair_path: ['data/pitts250k/retrieval_results/val/pairs_info_20.npy']
 
