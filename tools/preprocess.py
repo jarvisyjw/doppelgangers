@@ -18,10 +18,6 @@ from anyloc.datasets.base_datasets import get_dataset
 from doppelgangers.utils.loftr_matches import save_loftr_matches
 from viz import plot_images, read_image, plot_sequence, plot_retreivals
 
-def quit():
-    global exitProgram
-    exitProgram=True
-
 def sift_matches(root_dir: str, image0: str, image1: str):
     '''SIFT extraction
     '''
@@ -147,7 +143,6 @@ def txt2npy_mp(root_dir, txt_file, npy_file):
         print(missing.shape)
         np.save(npy_file + ".missing", missing)
     print('Done!')
-
 
 def check_pair(root_dir, image0, image1):
       assert Path(root_dir, image0).is_file(), "image0 is not a file"
