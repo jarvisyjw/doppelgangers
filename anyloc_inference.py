@@ -131,7 +131,8 @@ def extract_gdesc(cfg):
     loader = data.get_dataloader(cfg.data)
     model = importlib.import_module(cfg.model.type)
     model = model.get_model(cfg.model)
-    save_dir = Path(cfg.data.output_path, 'gdesc')
+    save_dir = Path(cfg.data.dataset_folder, cfg.data.dataset_name, 
+                    cfg.data.output_path, 'gdesc')
     with torch.no_grad():
         for idx, data in tqdm(enumerate(loader), total=len(loader)):
             img = data['img']
