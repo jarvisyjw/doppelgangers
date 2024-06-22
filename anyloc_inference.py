@@ -21,6 +21,7 @@ def parser():
                         help='GPU id to use. None means using all '
                              'available GPUs.')
     parser.add_argument('--retrieval', action='store_true')
+    parser.add_argument('--viz', action='store_true') # visualize the retrieval results
     args = parser.parse_args()
 
     def dict2namespace(config):
@@ -130,19 +131,22 @@ def extract_gdesc(cfg):
     loader = data.get_dataloader(cfg.data)
     model = importlib.import_module(cfg.model.type)
     model = model.get_model(cfg.model)
-    # save_dir = Path(cfg.data.desc_path)
+    save_dir = Path(cfg.data.output_path, 'gdesc')
     with torch.no_grad():
         for idx, data in tqdm(enumerate(loader), total=len(loader)):
             img = data['img']
             img_dirs = data['img_dir']
             # check if the image descriptors are already saved
-            gd_dirs_list = [f'{Path(img_dir).parent/Path(img_dir).stem}.npy' for idx, img_dir in enumerate(img_dirs)]
-            if all([Path(img_dir).exists() for img_dir in gd_dirs_list]):
+            gd_dirs_list = [f'{Path(Path(img_dir).parent.name, Path(img_dir).stem)}.npy' for idx, img_dir in enumerate(img_dirs)]
+            save_dir_list = [save_dir/gd_dir for gd_dir in gd_dirs_list]
+            if all([Path(gd_dir).exists() for gd_dir in save_dir_list]):
                 continue
             # if not, save the descriptors
             gd_batch = model(img) # shape: [batch_size, agg_dim], numpy.array()
             # Save the global descriptor to the save dir of images
-            for idx, gd_dir in enumerate(gd_dirs_list):
+            for idx, gd_dir in enumerate(save_dir_list):
+                if not Path(gd_dir).exists():
+                    gd_dir.parent.mkdir(parents=True, exist_ok=True)
                 np.save(gd_dir, gd_batch[idx])
                 # img_dir = Path(img_dir)
                 # np.save(f'{img_dir.parent/img_dir.stem}.npy', gd_batch[idx])
@@ -168,11 +172,23 @@ def retrieve(cfg):
     np.save(save_path/f'indices_{topk}.npy', indices)
     np.save(save_path/f'recalls_{topk}.npy', recalls)
     print(f"Recalls: {recalls}")
+
+# def viz(cfg):
+#     retrieval_path = Path(cfg.pairs_from_retrieval.retrieval_results)
+#     retrievals = np.load(retrieval_path, allow_pickle=True)
+#     print(retrievals.shape)
+    # for retrieval in tqdm(retrievals):
+        # print(f"Retrieval: {retrieval}")
+    #     for idx, (img_dir, sim) in enumerate(retrievals[retrieval][:20]):
+    #         print(f"Image {idx}: {img_dir}, Similarity: {sim}")
+    
     
 if __name__ == "__main__":
     args, cfg = parser()
     if args.retrieval:
         retrieve(cfg)
+    # if args.viz:
+    #     viz(cfg)
     else:
         extract_gdesc(cfg)
     print('Finished, Exiting program')
