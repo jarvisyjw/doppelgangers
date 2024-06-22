@@ -7,15 +7,20 @@ import sys
 import yaml
 import warnings
 import time
+import keyboard
 from concurrent.futures import ThreadPoolExecutor
+from matplotlib import pyplot as plt
 
 sys.path.append('../doppelgangers')
 sys.path.append('../anyloc')
 
 from anyloc.datasets.base_datasets import get_dataset
 from doppelgangers.utils.loftr_matches import save_loftr_matches
-# from hloc import extract_features, match_features, match_dense
-# from hloc.utils.io import get_matches
+from viz import plot_images, read_image, plot_sequence, plot_retreivals
+
+def quit():
+    global exitProgram
+    exitProgram=True
 
 def sift_matches(root_dir: str, image0: str, image1: str):
     '''SIFT extraction
@@ -194,48 +199,15 @@ def split_data(all_pairs: str, split_pairs: str, length):
         split_list = all_list[:length]
         np.save(split_pairs, split_list)
 
-# def main_worker(cfg):
-#     # Step1: Pairs from retreival
-#     print('Generating pairs from retrieval results......')
-#     pairs_from_retrieval(cfg)
-#     # Step2: Extract sift features
-#     print('Extracting sift features......')
-#     conf = extract_features.confs['sift']
-#     extract_features.main(conf, Path(cfg.pairs_from_retrieval.image_path), 
-#                           feature_path = Path(cfg.pairs_from_retrieval.sift_path))
-#     # Step3: Matching sift features
-#     print('Matching sift features......')
-#     match_features.main(match_features.confs['NN-ratio'], 
-#                         pairs = Path(cfg.pairs_from_retrieval.txt_output_path), 
-#                         features= Path(cfg.pairs_from_retrieval.sift_path), 
-#                         matches= Path(cfg.pairs_from_retrieval.matches_path))
-#     # Step4: Generate pairs_info npy
-#     txt_in = open(cfg.pairs_from_retrieval.txt_output_path, 'r')
-#     npy_out = cfg.pairs_from_retrieval.pairs_info
-#     pairs_info = []
-#     lines = txt_in.readlines()
-#     for line in tqdm(lines):
-#         image0, image1, label = line.strip('\n').split(' ')
-#         matches, scores = get_matches(cfg.pairs_from_retrieval.matches_path, image0, image1)
-#         num_matches, _ = len(matches)
-#         pairs_info.append(np.array([str(image0), str(image1), int(label), num_matches], dtype=object))
-#     out = np.array(pairs_info)
-#     np.save(npy_out, out)
-#     print('Done!')
-
 def parser():
     parser = argparse.ArgumentParser(description='preprocessing tools')
     parser.add_argument('config', type=str,
                         help='The configuration file.')
-    # parser.add_argument('--npy_path', default='data/train.npy', type=str, help='npy path')
-    # parser.add_argument('--txt_path', default='data/train.txt', type=str, help='txt path')
-    # parser.add_argument('--root_dir')
-    # parser.add_argument('--output')
-    # parser.add_argument('--weights')
     
     parser.add_argument('--loftr', action='store_true')
     parser.add_argument('--pairs', action='store_true')
     parser.add_argument('--txt', action='store_true')
+    parser.add_argument('--viz', action='store_true')
     args = parser.parse_args()
     
     def dict2namespace(config):
@@ -254,7 +226,6 @@ def parser():
     config = dict2namespace(config)
     
     return args, config
-
 
 def npy2txt(npy: str, txt: str):
     pairs = np.load(npy, allow_pickle=True)
@@ -358,14 +329,6 @@ def pairs_from_retrieval_mp(cfg, num_cores=20):
     print('Matching images using multi-thread...')
     # Matching image using multi-thread
     
-    # def load_image_pair(pair: np.array, root_dir: str):
-    #     image0, image1, label, num_matches = pair
-    #     image0 = cv2.imread(str(Path(root_dir, image0)))
-    #     image1 = cv2.imread(str(Path(root_dir, image1)))
-    #     if image0 is None or image1 is None:
-    #         raise FileNotFoundError("Error: One of the images did not load.")
-    #     return image0, image1
-    
     def match_image_pairs(pairs:np.array, root_dir = cfg.pairs_from_retrieval.image_root):
         image_pairs = []
         for pair in tqdm(pairs):
@@ -445,3 +408,43 @@ if __name__ == "__main__":
         '''
         conf = cfg.pairs_from_retrieval
         save_loftr_matches(conf.image_root, conf.pairs_info, conf.loftr_output, conf.loftr_weights)
+    
+    # Step 3: Visualize retreival results
+    if args.viz:
+        # exitProgram = False
+        # keyboard.add_hotkey('q', lambda: quit())
+        # while not exitProgram:
+            
+        ### visualize pairs_from_retrieval
+        # retrievals = np.load(cfg.pairs_from_retrieval.retrieval_results, allow_pickle=True)
+        # dataset = get_dataset(cfg.data)
+        # # get positive per query
+        # positives_per_query = dataset.get_positives()
+        # queries_paths = dataset.get_queries_paths()
+        # database_paths = dataset.get_database_paths()
+        
+        # for idx, retrieval in tqdm(enumerate(retrievals), total=len(retrievals)):
+        #     query = queries_paths[idx]
+        #     topk = database_paths[retrieval[100]]
+        #     query_image = read_image(query)
+        #     topk_image = read_image(topk)
+        #     plot_images([query_image, topk_image], titles=['Query', 'Retrieval'], figsize=4.5)
+        #     plt.show()
+        #     # topk_images = [read_image(database_paths[db]) for db in topk]
+        #     # positives = np.zeros(len(topk))
+        #     # positives = [1 if db in positives_per_query[idx] else 0 for db in topk]
+        #     # positives = [1 for db in topk if db in positives_per_query[idx]]
+        #     # plot_retreivals([query_image], topk_images, positives, figsize=(15, 10), dpi=100, pad=.5)
+        #     # plt.show()
+            
+        ### visualize pairs_info
+            pairs_info = cfg.pairs_from_retrieval.pairs_info
+            pairs_info = np.load(pairs_info, allow_pickle=True)
+            image_root = cfg.pairs_from_retrieval.image_root
+            for pair in pairs_info[0::18]:
+                image0, image1, label, num_matches = pair
+                images = [read_image(Path(image_root, image0)), read_image(Path(image_root, image1))]
+                plot_images(images, titles=[f'Image {i}' for i in range(2)], figsize=4.5)
+                print(f'{image0} {image1} {label} {num_matches}')
+                plt.show()
+        # sys.exit()
