@@ -2,17 +2,17 @@ data:
   type: doppelgangers.datasets.pairwise_disambiguation_dataset
   num_workers: 4  
   train:
-    image_dir: ['data/robotcar_seasons/images/']
-    loftr_match_dir: ['data/robotcar_seasons/loftr_matches/qAutumn_dbSunCloud/']
+    image_dir: ['data/pitts250k/images/train']
+    loftr_match_dir: ['data/pitts250k/retrieval_results/train/loftr_matches']
     batch_size: 8
-    img_size: 1024
-    pair_path: ['data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_train.npy']
+    img_size: 640
+    pair_path: ['data/pitts250k/retrieval_results/train/pairs_info_20.npy']
   test:
-    image_dir: ['data/robotcar_seasons/images/']
-    loftr_match_dir: ['data/robotcar_seasons/loftr_matches/qAutumn_dbSunCloud/']
+    image_dir: ['data/pitts250k/images/val']
+    loftr_match_dir: ['data/pitts250k/retrieval_results/val/loftr_matches']
     batch_size: 8
-    img_size: 1024
-    pair_path: ['data/robotcar_seasons/pairs_metadata/robotcar_qAutumn_dbSunCloud_test.npy']
+    img_size: 640
+    pair_path: ['data/pitts250k/retrieval_results/val/pairs_info_20.npy']
 
 models:
   decoder:
@@ -32,7 +32,6 @@ trainer:
     weight_decay: 0.
     scheduler: 'linear'
     step_epoch: 10
-
 
 viz:
   log_freq: 10
