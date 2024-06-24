@@ -68,7 +68,7 @@ class Trainer(BaseTrainer):
             'loss': loss.detach().cpu().item()
         }
 
-    def log_train(self, train_info, train_data, writer=None,
+    def log_train(self, train_info, train_log_info, writer=None,
                   step=None, epoch=None, visualize=False, **kwargs):
         if writer is None:
             return
@@ -76,17 +76,21 @@ class Trainer(BaseTrainer):
         # Log training information to tensorboard
         train_info = {k: (v.cpu() if not isinstance(v, float) else v)
                       for k, v in train_info.items()}
-        for k, v in train_info.items():
-            if not ('loss' in k):
+        
+        if train_log_info is not None:
+            for k, v in train_log_info.items():
                 if 'pr_curve' in k:
-                    # v[0]: gt, v[1]: prob
-                    plot_pr_curve(v[0], v[1], writer, step=step, epoch=epoch, name=k)
+                        # v[0]: gt, v[1]: prob
+                        plot_pr_curve(v[0], v[1], writer, step=step, epoch=epoch, name=k)
                 else:
                     if step is not None:
                         writer.add_scalar(k+'_step', v, step)
                     else:
                         writer.add_scalar(k+'_epoch', v, epoch)
-            
+        
+        for k, v in train_info.items():
+            if not ('loss' in k):
+                continue
             if step is not None:
                 writer.add_scalar('train/' + k, v, step)
             else:
