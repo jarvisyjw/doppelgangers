@@ -309,6 +309,8 @@ Two types of pairs FPs (False Positives) and FNs (False Negatives) are what we a
 | :------:|:----:|:-----:| :----:|:----:|
 | [Pretained(Doppelgangers)](val_logs/doppelgangers_classifier_noflip_pitts250k_val_2024-Jun-21-18-10-52)| Pitts250k Test| 61.191| 0|[file](val_logs/doppelgangers_classifier_noflip_pitts250k_val_2024-Jun-21-18-10-52/pr_curve.pdf) | 
 | [Pretrained(Doppelgangers)](val_logs/doppelgangers_classifier_noflip_pitts250k_val_val_2024-Jun-21-22-06-51)| Pitts250k Val | 43.636 | 0 | [file](val_logs/doppelgangers_classifier_noflip_pitts250k_val_val_2024-Jun-21-22-06-51/pr_curve.pdf)|
+| From sctrach (Pitts250k Train, epoch=10)| Pitts250k Train|93.372| |
+
 
 
 ### Tokyo247 dataset
