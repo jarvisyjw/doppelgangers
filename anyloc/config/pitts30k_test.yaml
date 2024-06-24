@@ -1,7 +1,7 @@
 data:
   # dataset config
   type: anyloc.datasets.base_datasets
-  split: val
+  split: test
   dataset_name: pitts30k
   dataset_folder: data/
   output_path: retrieval_results/
@@ -32,9 +32,9 @@ model:
   desc_facet: value # 'query', 'key', 'value', 'token'
 
 pairs_from_retrieval:
-  retrieval_results: data/pitts30k/retrieval_results/val/indices_200.npy
-  pairs_info: data/pitts30k/retrieval_results/val/pairs_info_20.npy
-  txt_path: data/pitts30k/retrieval_results/val/pairs_20.txt
-  image_root: data/pitts30k/images/val/
-  loftr_output: data/pitts30k/retrieval_results/val/loftr_matches/
+  retrieval_results: data/pitts30k/retrieval_results/test/indices_200.npy
+  pairs_info: data/pitts30k/retrieval_results/test/pairs_info_20.npy
+  txt_path: data/pitts30k/retrieval_results/test/pairs_20.txt
+  image_root: data/pitts30k/images/test/
+  loftr_output: data/pitts30k/retrieval_results/test/loftr_matches/
   loftr_weights: weights/outdoor_ds.ckpt

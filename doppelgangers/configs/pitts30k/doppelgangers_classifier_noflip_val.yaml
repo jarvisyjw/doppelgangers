@@ -2,17 +2,17 @@ data:
   type: doppelgangers.datasets.pairwise_disambiguation_dataset
   num_workers: 4  
   train:
-    image_dir: ['data/pitts250k/images/train']
-    loftr_match_dir: ['data/pitts250k/retrieval_results/train/loftr_matches']
-    batch_size: 16
-    img_size: 640
-    pair_path: ['data/pitts250k/retrieval_results/train/pairs_info_20.npy']
-  test:
-    image_dir: ['data/pitts250k/images/val']
-    loftr_match_dir: ['data/pitts250k/retrieval_results/val/loftr_matches']
+    image_dir: ['data/pitts30k/images/train']
+    loftr_match_dir: ['data/pitts30k/retrieval_results/train/loftr_matches']
     batch_size: 32
     img_size: 640
-    pair_path: ['data/pitts250k/retrieval_results/val/pairs_info_20.npy']
+    pair_path: ['data/pitts30k/retrieval_results/train/pairs_info_20.npy']
+  test:
+    image_dir: ['data/pitts30k/images/val']
+    loftr_match_dir: ['data/pitts30k/retrieval_results/val/loftr_matches']
+    batch_size: 32
+    img_size: 640
+    pair_path: ['data/pitts30k/retrieval_results/val/pairs_info_20.npy']
 
 models:
   decoder:
