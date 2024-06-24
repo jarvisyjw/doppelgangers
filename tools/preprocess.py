@@ -7,7 +7,6 @@ import sys
 import yaml
 import warnings
 import time
-import keyboard
 from concurrent.futures import ThreadPoolExecutor
 from matplotlib import pyplot as plt
 
@@ -198,6 +197,8 @@ def parser():
     parser = argparse.ArgumentParser(description='preprocessing tools')
     parser.add_argument('config', type=str,
                         help='The configuration file.')
+    parser.add_argument('--num_cores', type=int, default=20,
+                        help='Number of cores for multiprocessing.')
     
     parser.add_argument('--loftr', action='store_true')
     parser.add_argument('--pairs', action='store_true')
@@ -285,7 +286,7 @@ def pairs_from_retrieval(cfg):
     print(f'Positive Pairs: {pos}, Negative Pairs: {neg}')
 
 
-def pairs_from_retrieval_mp(cfg, num_cores=20):
+def pairs_from_retrieval_mp(cfg, num_cores=40):
     # TODO: implement muti-Process/Thread acceleration version
     dataset = get_dataset(cfg.data)
     # get positive per query
@@ -390,7 +391,7 @@ if __name__ == "__main__":
             # Process pairs from retreival results.
             # main_worker(cfg)
             # pairs_from_retrieval(cfg)
-            pairs_from_retrieval_mp(cfg)
+            pairs_from_retrieval_mp(cfg, int(args.num_cores))
 
     # Step 2: Extract loftr matches
     if args.loftr:
