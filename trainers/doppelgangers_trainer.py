@@ -44,7 +44,7 @@ class Trainer(BaseTrainer):
             if writer is not None:
                 writer.add_scalar(
                     'train/opt_dec_lr', self.scheduler_dec.get_lr()[0], epoch)
-                
+
 
     def update(self, data, *args, **kwargs):
         if 'no_update' in kwargs:
@@ -78,7 +78,15 @@ class Trainer(BaseTrainer):
                       for k, v in train_info.items()}
         for k, v in train_info.items():
             if not ('loss' in k):
-                continue
+                if 'pr_curve' in k:
+                    # v[0]: gt, v[1]: prob
+                    plot_pr_curve(v[0], v[1], writer, step=step, epoch=epoch, name=k)
+                else:
+                    if step is not None:
+                        writer.add_scalar(k+'_step', v, step)
+                    else:
+                        writer.add_scalar(k+'_epoch', v, epoch)
+            
             if step is not None:
                 writer.add_scalar('train/' + k, v, step)
             else:
@@ -95,6 +103,7 @@ class Trainer(BaseTrainer):
         pred_list = list()
         prob_list = list()
         with torch.no_grad():
+            print("Test on validation set:")
             for bidx, data in tqdm.tqdm(enumerate(test_loader), total=len(test_loader)):
                 data['image'] = data['image'].cuda()
                 gt = data['gt'].cuda()
@@ -116,6 +125,35 @@ class Trainer(BaseTrainer):
  
         all_res ={stage+'AP': ap, stage+'pr_curve': [gt_list, prob_list]}
         return all_res
+    
+    def validate_train(self, train_loader, epoch, stage='train/', *args, **kwargs):
+        self.decoder.eval()
+        gt_list = list()
+        pred_list = list()
+        prob_list = list()
+        with torch.no_grad():
+            print("Test on Training set:")
+            for bidx, data in tqdm.tqdm(enumerate(train_loader), total=len(train_loader)):
+                data['image'] = data['image'].cuda()
+                gt = data['gt'].cuda()
+                score = self.decoder(data['image'])
+                for i in range(score.shape[0]):
+                    prob_list.append(score[i].cpu().numpy())
+                    pred_list.append(torch.argmax(score,dim=1)[i].cpu().numpy())
+                    gt_list.append(gt[i].cpu().numpy())
+        gt_list = np.array(gt_list).reshape(-1)
+        pred_list = np.array(pred_list).reshape(-1)
+        prob_list = np.array(prob_list).reshape(-1, 2)
+        ap = compute_ap(gt_list, prob_list)
+        
+        print(stage + "average precision: ", ap)
+        
+        # np.save(os.path.join(self.cfg.save_dir, stage[:-1]+"_doppelgangers_list.npy"), {'pred': pred_list, 'gt': gt_list, 'prob': prob_list})
+        # np.save(os.path.join(self.cfg.save_dir, 'checkpoints', stage[:-1]+"_doppelgangers_list_%d.npy"%epoch), {'pred': pred_list, 'gt': gt_list, 'prob': prob_list})
+ 
+        all_res ={stage+'AP': ap, stage+'pr_curve': [gt_list, prob_list]}
+        return all_res
+        
 
     def save(self, epoch=None, step=None, appendix=None, **kwargs):
         d = {
@@ -161,7 +199,7 @@ class Trainer(BaseTrainer):
         return start_epoch
     
 
-    def log_val(self, val_info, writer=None, step=None, epoch=None, **kwargs):
+    def log_val(self, val_info, train_info = None, writer=None, step=None, epoch=None, **kwargs):
         if writer is not None:
             for k, v in val_info.items():
                 if 'pr_curve' in k:
@@ -172,3 +210,10 @@ class Trainer(BaseTrainer):
                         writer.add_scalar(k+'_step', v, step)
                     else:
                         writer.add_scalar(k+'_epoch', v, epoch)
+                        
+            # if train_info is not None:
+            #     for k, v in train_info.items():
+            #         if step is not None:
+            #             writer.add_scalar('train/'+k+'_step', v, step)
+            #         else:
+            #             writer.add_scalar('train/'+k+'_epoch', v, epoch)
