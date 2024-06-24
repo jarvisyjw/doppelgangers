@@ -412,35 +412,43 @@ if __name__ == "__main__":
         # while not exitProgram:
             
         ### visualize pairs_from_retrieval
-        # retrievals = np.load(cfg.pairs_from_retrieval.retrieval_results, allow_pickle=True)
-        # dataset = get_dataset(cfg.data)
-        # # get positive per query
-        # positives_per_query = dataset.get_positives()
-        # queries_paths = dataset.get_queries_paths()
-        # database_paths = dataset.get_database_paths()
+        retrievals = np.load(cfg.pairs_from_retrieval.retrieval_results, allow_pickle=True)
+        dataset = get_dataset(cfg.data)
+        # get positive per query
+        positives_per_query = dataset.get_positives()
+        queries_paths = dataset.get_queries_paths()
+        database_paths = dataset.get_database_paths()
         
         # for idx, retrieval in tqdm(enumerate(retrievals), total=len(retrievals)):
-        #     query = queries_paths[idx]
-        #     topk = database_paths[retrieval[100]]
-        #     query_image = read_image(query)
-        #     topk_image = read_image(topk)
-        #     plot_images([query_image, topk_image], titles=['Query', 'Retrieval'], figsize=4.5)
-        #     plt.show()
-        #     # topk_images = [read_image(database_paths[db]) for db in topk]
-        #     # positives = np.zeros(len(topk))
-        #     # positives = [1 if db in positives_per_query[idx] else 0 for db in topk]
-        #     # positives = [1 for db in topk if db in positives_per_query[idx]]
-        #     # plot_retreivals([query_image], topk_images, positives, figsize=(15, 10), dpi=100, pad=.5)
-        #     # plt.show()
+        query = queries_paths[0]
+        retrieval = retrievals[0]
+        positives = positives_per_query[0]
+        labels = [1 if retrie in positives else 0 for retrie in retrieval]
+        topks = [database_paths[idx] for idx in retrieval[:10]]
+        # topk = database_paths[retrievals[0][:20]]
+        query_image = read_image(query)
+        topk_image = [read_image(topk) for topk in topks]
+        images = [query_image] + topk_image
+        titles = ['Query'] + [label for label in labels]
+        
+        plot_images(images, titles=titles)
+        # plt.savefig('assets/anyloc_pitts250k_retrieval_example.png')
+        plt.show()
+        # topk_images = [read_image(database_paths[db]) for db in topk]
+        # positives = np.zeros(len(topk))
+        # positives = [1 if db in positives_per_query[idx] else 0 for db in topk]
+        # positives = [1 for db in topk if db in positives_per_query[idx]]
+        # plot_retreivals([query_image], topk_images, positives, figsize=(15, 10), dpi=100, pad=.5)
+        # plt.show()
             
         ### visualize pairs_info
-            pairs_info = cfg.pairs_from_retrieval.pairs_info
-            pairs_info = np.load(pairs_info, allow_pickle=True)
-            image_root = cfg.pairs_from_retrieval.image_root
-            for pair in pairs_info[0::18]:
-                image0, image1, label, num_matches = pair
-                images = [read_image(Path(image_root, image0)), read_image(Path(image_root, image1))]
-                plot_images(images, titles=[f'Image {i}' for i in range(2)], figsize=4.5)
-                print(f'{image0} {image1} {label} {num_matches}')
-                plt.show()
+            # pairs_info = cfg.pairs_from_retrieval.pairs_info
+            # pairs_info = np.load(pairs_info, allow_pickle=True)
+            # image_root = cfg.pairs_from_retrieval.image_root
+            # for pair in pairs_info[0::18]:
+            #     image0, image1, label, num_matches = pair
+            #     images = [read_image(Path(image_root, image0)), read_image(Path(image_root, image1))]
+            #     plot_images(images, titles=[f'Image {i}' for i in range(2)], figsize=4.5)
+            #     print(f'{image0} {image1} {label} {num_matches}')
+            #     plt.show()
         # sys.exit()

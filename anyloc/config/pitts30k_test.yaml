@@ -11,7 +11,11 @@ data:
   resize: [640, 480]
   # dataloader config only used when cached is False
   num_workers: 4
+<<<<<<< HEAD
   batch_size: 16
+=======
+  batch_size: 8
+>>>>>>> 38d4b76f2f7c8b5eb7fb0dffdeb0497a05d543e4
   shuffle: False
 
 topk:
@@ -32,9 +36,17 @@ model:
   desc_facet: value # 'query', 'key', 'value', 'token'
 
 pairs_from_retrieval:
+<<<<<<< HEAD
   retrieval_results: data/pitts30k/retrieval_results/test/indices_200.npy
   pairs_info: data/pitts30k/retrieval_results/test/pairs_info_20.npy
   txt_path: data/pitts30k/retrieval_results/test/pairs_20.txt
   image_root: data/pitts30k/images/test/
   loftr_output: data/pitts30k/retrieval_results/test/loftr_matches/
+=======
+  retrieval_results: data/pitts250k/retrieval_results/test/indices_200.npy
+  pairs_info: data/pitts250k/retrieval_results/test/pairs_info_20.npy
+  txt_path: data/pitts250k/retrieval_results/test/pairs_20.txt
+  image_root: data/pitts250k/images/test/
+  loftr_output: data/pitts250k/retrieval_results/test/loftr_matches/
+>>>>>>> 38d4b76f2f7c8b5eb7fb0dffdeb0497a05d543e4
   loftr_weights: weights/outdoor_ds.ckpt
