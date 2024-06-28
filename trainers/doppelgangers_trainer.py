@@ -72,6 +72,9 @@ class Trainer(BaseTrainer):
                   step=None, epoch=None, visualize=False, **kwargs):
         if writer is None:
             return
+        
+        if train_info is None:
+            return
 
         # Log training information to tensorboard
         train_info = {k: (v.cpu() if not isinstance(v, float) else v)
