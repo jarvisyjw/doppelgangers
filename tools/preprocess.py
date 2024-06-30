@@ -7,7 +7,6 @@ import sys
 import yaml
 import warnings
 import time
-import keyboard
 from concurrent.futures import ThreadPoolExecutor
 from matplotlib import pyplot as plt
 
