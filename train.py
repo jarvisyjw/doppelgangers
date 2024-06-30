@@ -118,11 +118,13 @@ def main_worker(cfg, args):
                       % (epoch, bidx, len(train_loader), duration,
                          logs_info['loss']))
                 trainer.log_train(
-                    logs_info, data,
+                    logs_info, None,
                     writer=writer, epoch=epoch, step=step)
             if step % int(cfg.viz.val_freq) == 0:
                 val_info = trainer.validate(test_loader, epoch=epoch)
+                train_log_info = trainer.validate_train(train_loader, epoch=epoch)
                 trainer.log_val(val_info, writer=writer, step=step)
+                trainer.log_train(None, train_log_info, writer=writer, step=step)
             
         # Save first so that even if the visualization bugged,
         # we still have something
@@ -134,6 +136,8 @@ def main_worker(cfg, args):
                 int(cfg.viz.val_freq) > 0:
             val_info = trainer.validate(test_loader, epoch=epoch)
             trainer.log_val(val_info, writer=writer, epoch=epoch)
+            train_log_info = trainer.validate_train(train_loader, epoch=epoch)
+            trainer.log_train(None, train_log_info, writer=writer, epoch=epoch)
 
         # Signal the trainer to cleanup now that an epoch has ended
         trainer.epoch_end(epoch, writer=writer)

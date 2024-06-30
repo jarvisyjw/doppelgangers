@@ -42,17 +42,22 @@ class BaseDataset(Dataset):
                 split="train", _ext="jpg",
                 max_img_size=1024,
                 positive_dist_threshold= 25,
+                desc_path = 'gdesc',
                 resize = None,
                 output_path = None):
         
             super().__init__()
             self.dataset_name = dataset_name
             self.dataset_folder = Path(datasets_folder, dataset_name)
+            
             self.resize = resize
             if output_path is not None:
                 self.output_path = Path(self.dataset_folder, output_path, split)
             else:
                 self.output_path = None
+            self.database_desc_path = Path(self.output_path, desc_path, "database")
+            self.queries_descs_path = Path(self.output_path, desc_path, "queries")
+            
             self.dataset_folder = Path(self.dataset_folder, "images", split)
             
             database_folder_name, queries_folder_name = "database", "queries"
@@ -70,8 +75,9 @@ class BaseDataset(Dataset):
             self.database_paths = natsorted(self.database_folder.glob(f"*.{_ext}"))
             self.queries_paths = natsorted(self.queries_folder.glob(f"*.{_ext}"))
             # descriptors
-            self.database_descs = natsorted(self.database_folder.glob(f"*.npy"))
-            self.queries_descs = natsorted(self.queries_folder.glob(f"*.npy"))
+            print(self.database_desc_path, self.queries_descs_path)
+            self.database_descs = natsorted(self.database_desc_path.glob(f"*.npy"))
+            self.queries_descs = natsorted(self.queries_descs_path.glob(f"*.npy"))
             
             self.database_utms, self.queries_utms, \
                   self.soft_positives_per_query = \

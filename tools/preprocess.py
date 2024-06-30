@@ -17,10 +17,6 @@ from anyloc.datasets.base_datasets import get_dataset
 from doppelgangers.utils.loftr_matches import save_loftr_matches
 from viz import plot_images, read_image, plot_sequence, plot_retreivals
 
-def quit():
-    global exitProgram
-    exitProgram=True
-
 def sift_matches(root_dir: str, image0: str, image1: str):
     '''SIFT extraction
     '''
@@ -147,7 +143,6 @@ def txt2npy_mp(root_dir, txt_file, npy_file):
         np.save(npy_file + ".missing", missing)
     print('Done!')
 
-
 def check_pair(root_dir, image0, image1):
       assert Path(root_dir, image0).is_file(), "image0 is not a file"
       assert Path(root_dir, image1).is_file(), "image1 is not a file"
@@ -202,6 +197,8 @@ def parser():
     parser = argparse.ArgumentParser(description='preprocessing tools')
     parser.add_argument('config', type=str,
                         help='The configuration file.')
+    parser.add_argument('--num_cores', type=int, default=20,
+                        help='Number of cores for multiprocessing.')
     
     parser.add_argument('--loftr', action='store_true')
     parser.add_argument('--pairs', action='store_true')
@@ -289,7 +286,7 @@ def pairs_from_retrieval(cfg):
     print(f'Positive Pairs: {pos}, Negative Pairs: {neg}')
 
 
-def pairs_from_retrieval_mp(cfg, num_cores=20):
+def pairs_from_retrieval_mp(cfg, num_cores=40):
     # TODO: implement muti-Process/Thread acceleration version
     dataset = get_dataset(cfg.data)
     # get positive per query
@@ -394,7 +391,7 @@ if __name__ == "__main__":
             # Process pairs from retreival results.
             # main_worker(cfg)
             # pairs_from_retrieval(cfg)
-            pairs_from_retrieval_mp(cfg)
+            pairs_from_retrieval_mp(cfg, int(args.num_cores))
 
     # Step 2: Extract loftr matches
     if args.loftr:

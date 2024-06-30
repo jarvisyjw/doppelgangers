@@ -8,9 +8,10 @@ data:
   image_ext: jpg
   max_img_size: 1024 # Maximum edge length (expected) across all images (GPU OOM)
   positive_dist_threshold: 25
+  resize: [640, 480]
   # dataloader config only used when cached is False
-  num_workers: 0
-  batch_size: 1
+  num_workers: 4
+  batch_size: 8
   shuffle: False
 
 topk:
@@ -33,4 +34,7 @@ model:
 pairs_from_retrieval:
   retrieval_results: data/msls/retrieval_results/train/indices_200.npy
   output_path: data/msls/retrieval_results/train/pairs_200.npy
-  
+  txt_path: data/msls/retrieval_results/train/pairs_20.txt
+  image_root: data/msls/images/train/
+  loftr_output: data/msls/retrieval_results/train/loftr_matches/
+  loftr_weights: weights/outdoor_ds.ckpt

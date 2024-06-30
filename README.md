@@ -324,6 +324,17 @@ Follow the instructions in [VPR-datasets-downloader](https://github.com/gmberton
 </p>
 
 - Use AnyLoc to Retrieve TopK candidates
-  
-  
+
+### Pitts30k dataset
+
+```bash
+|---Train
+|---Val: Positive Pairs: 71486, Negative Pairs: 80674
+|---Test: Positive Pairs: 61082, Negative Pairs: 75238
+```
+
+| Setting | Set | AP % | MR %|
+|:---: | :---: | :---:| :---:|
+|Pre-trained (Doppelgangers)| val| 64.030 | 0 |
+|Pre-trained (Doppelgangers)|test|
   
