@@ -8,7 +8,10 @@ import shutil
 from tqdm import tqdm
 from keras.applications.vgg16 import VGG16
 
-sys.path.append('/home/jarvis/jw_ws/Verification/doppelgangers')
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+# sys.path.append(Path(Path.cwd().parent).parent)
+print(sys.path)
+
 from anyloc.datasets.base_datasets import get_dataset
 from doppelgangers.datasets.pairwise_disambiguation_dataset import get_datasets
 
