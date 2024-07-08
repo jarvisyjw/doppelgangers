@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 import shutil
 from tqdm import tqdm
-from keras.applications.vgg16 import VGG16
+# from keras.applications.vgg16 import VGG16
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 # sys.path.append(Path(Path.cwd().parent).parent)
@@ -27,7 +27,7 @@ from doppelgangers.datasets.pairwise_disambiguation_dataset import get_datasets
 # print(f'Train flip/Test ratio: {train_flip_pairs.shape[0]/test_pairs.shape[0]:.2f}')
 
 def parser():
-    parser = argparse.ArgumentParser(description='anyloc')
+    parser = argparse.ArgumentParser(description='dataset inspection')
     parser.add_argument('config', type=str,
                         help='The configuration file.')
 
@@ -64,9 +64,14 @@ def copy_desc(source_path: Path, dest_path: Path, desc_list = None):
 
 def viz_tsne(dataset, idx):
     viz_sample = dataset[idx]
-    for sample in tqdm(viz_sample, total=len(viz_sample)):
-        data = sample['data']
-        print(data.shape)
+    data = viz_sample['image']
+    # data with size torch.Size([10, 640, 640])
+    gt = viz_sample['gt']
+    print(data.shape)
+    print(gt)
+    # for sample in tqdm(viz_sample, total=len(viz_sample)):
+    #     data = sample['image']
+    #     print(data.shape)
         
 
 if __name__ == '__main__':
