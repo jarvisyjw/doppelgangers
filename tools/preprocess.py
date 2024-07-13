@@ -92,6 +92,9 @@ def txt2npy(root_dir, txt_file, npy_file):
     
     if Path(npy_file).is_dir():
         npy_file = Path(npy_file, "pairs.npy")
+    
+    if not Path(npy_file).parent.exists():
+        Path(npy_file).parent.mkdir(parents=True, exist_ok=True)
 
     f = open(txt_file, 'r')
     pairs = []
@@ -381,12 +384,12 @@ if __name__ == "__main__":
     # Step 1: Generate pairs meta info
     if args.pairs:
         if args.txt:
-            conf = cfg.pairs_from_retrieval
-            if Path(conf.pairs_info).is_file():
+            conf = cfg.data.train
+            if Path(conf.pair_path[0]).is_file():
                 raise Warning('npy file already exists, skip generation.')
             else:
-                conf = cfg.pairs_from_retrieval
-                txt2npy(conf.image_root, conf.txt_path, conf.pairs_info)
+                # conf = cfg.pairs_from_retrieval
+                txt2npy(conf.image_dir[0], conf.txt_path[0], conf.pair_path[0])
         else:
             # Process pairs from retreival results.
             # main_worker(cfg)
