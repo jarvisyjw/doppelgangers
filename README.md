@@ -230,27 +230,27 @@ pip install -r requirements.txt # install doppelgangers dependences
   ```bash
   # use pretrained models in original release
   # configs in doppelgangers/config/gvbench
-  python test.py doppelgangers/config/gvbench/{config}.yaml
+  python test.py doppelgangers/config/gvbench/{config}.yaml --pretrained weights/doppelgangers_classifier_loftr.pt
   # plot PR-Curve
-  python tools/eval_helper.py --pr --val_logs /path/to/val/logs
+  python tools/eval_helper.py --pr --val_log /path/to/val/logs
   # The PR-Curve will be saved at the val_log folder
   ```
 
 ## Exp results
   
 - Max Recall @100Precision (MR%)
-  | Method | Day | Night| Season| Weather|
-  | :------|:----|:-----|:------|:-------|
+  | Method | Day | Night| Season| Weather| Night-hard |Season-hard|
+  | :------|:----|:-----|:------|:-------|:-----|:-----|
   | GV (SP+SG)|**48.267**|**30.609**|**66.514**|**74.633**|
   | GV (LoFTR)|45.336|18.206|12.096|18.206|
-  | Doppelgangers| 35.465| 1.991| 22.435| 30.011|
+  | Doppelgangers| 35.465| 1.991| 22.435| 30.011|13.184 | 2.083|
 
 - Average Precision (AP%)
-  | Method | Day | Night| Season| Weather|
-  | :------|:----|:-----|:------|:-------|
+  | Method | Day | Night| Season| Weather| Night-hard | Season-hard|
+  | :------|:----|:-----|:------|:-------|:----|:-----|
   | GV (SP+SG)|**99.634**|95.969|99.911|**99.907**|
   | GV (LoFTR)|99.500|**97.881**|**99.874** | 97.881|
-  | Doppelgangers| 97.056| 60.759| 99.134| 99.574|
+  | Doppelgangers| 97.056| 60.759| 99.134| 99.574| 30.066|65.163|
 
 ## Fintune or train from scratch
 
