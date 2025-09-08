@@ -230,27 +230,27 @@ pip install -r requirements.txt # install doppelgangers dependences
   ```bash
   # use pretrained models in original release
   # configs in doppelgangers/config/gvbench
-  python test.py doppelgangers/config/gvbench/{config}.yaml
+  python test.py doppelgangers/config/gvbench/{config}.yaml --pretrained weights/doppelgangers_classifier_loftr.pt
   # plot PR-Curve
-  python tools/eval_helper.py --pr --val_logs /path/to/val/logs
+  python tools/eval_helper.py --pr --val_log /path/to/val/logs
   # The PR-Curve will be saved at the val_log folder
   ```
 
 ## Exp results
   
 - Max Recall @100Precision (MR%)
-  | Method | Day | Night| Season| Weather|
-  | :------|:----|:-----|:------|:-------|
+  | Method | Day | Night| Season| Weather| Night-hard |Season-hard|
+  | :------|:----|:-----|:------|:-------|:-----|:-----|
   | GV (SP+SG)|**48.267**|**30.609**|**66.514**|**74.633**|
   | GV (LoFTR)|45.336|18.206|12.096|18.206|
-  | Doppelgangers| 35.465| 1.991| 22.435| 30.011|
+  | Doppelgangers| 35.465| 1.991| 22.435| 30.011|13.184 | 2.083|
 
 - Average Precision (AP%)
-  | Method | Day | Night| Season| Weather|
-  | :------|:----|:-----|:------|:-------|
+  | Method | Day | Night| Season| Weather| Night-hard | Season-hard|
+  | :------|:----|:-----|:------|:-------|:----|:-----|
   | GV (SP+SG)|**99.634**|95.969|99.911|**99.907**|
   | GV (LoFTR)|99.500|**97.881**|**99.874** | 97.881|
-  | Doppelgangers| 97.056| 60.759| 99.134| 99.574|
+  | Doppelgangers| 97.056| 60.759| 99.134| 99.574| 30.066|65.163|
 
 ## Fintune or train from scratch
 
@@ -304,6 +304,15 @@ Two types of pairs FPs (False Positives) and FNs (False Negatives) are what we a
   - Val Set: Positive Pairs: 69794, Negative Pairs: 82366
   - Test Set: Positive Pairs: 73407, Negative Pairs: 92193
   
+#### Exps:
+| Train Strategy | Test Set|AP(%) | MR(%)| PR-Curve|
+| :------:|:----:|:-----:| :----:|:----:|
+| [Pretained(Doppelgangers)](val_logs/doppelgangers_classifier_noflip_pitts250k_val_2024-Jun-21-18-10-52)| Pitts250k Test| 61.191| 0|[file](val_logs/doppelgangers_classifier_noflip_pitts250k_val_2024-Jun-21-18-10-52/pr_curve.pdf) | 
+| [Pretrained(Doppelgangers)](val_logs/doppelgangers_classifier_noflip_pitts250k_val_val_2024-Jun-21-22-06-51)| Pitts250k Val | 43.636 | 0 | [file](val_logs/doppelgangers_classifier_noflip_pitts250k_val_val_2024-Jun-21-22-06-51/pr_curve.pdf)|
+| From sctrach (Pitts250k Train, epoch=10)| Pitts250k Train|93.372| |
+
+
+
 ### Tokyo247 dataset
 
 #### Dataset Download and Preparation
@@ -315,6 +324,17 @@ Follow the instructions in [VPR-datasets-downloader](https://github.com/gmberton
 </p>
 
 - Use AnyLoc to Retrieve TopK candidates
-  
-  
+
+### Pitts30k dataset
+
+```bash
+|---Train
+|---Val: Positive Pairs: 71486, Negative Pairs: 80674
+|---Test: Positive Pairs: 61082, Negative Pairs: 75238
+```
+
+| Setting | Set | AP % | MR %|
+|:---: | :---: | :---:| :---:|
+|Pre-trained (Doppelgangers)| val| 64.030 | 0 |
+|Pre-trained (Doppelgangers)|test|
   

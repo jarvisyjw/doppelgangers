@@ -5,13 +5,14 @@ data:
   dataset_name: tokyo247
   dataset_folder: data/
   output_path: retrieval_results/
+  # desc_path: data/tokyo247/descriptors/
   image_ext: jpg
   max_img_size: 1024 # Maximum edge length (expected) across all images (GPU OOM)
   positive_dist_threshold: 25
-  resize
+  resize: [640,480]
   # dataloader config only used when cached is False
   num_workers: 4
-  batch_size: 8
+  batch_size: 16
   shuffle: False
 
 topk:
@@ -32,9 +33,9 @@ model:
   desc_facet: value # 'query', 'key', 'value', 'token'
 
 pairs_from_retrieval:
-  retrieval_results: data/pitts250k/retrieval_results/train/indices_200.npy
-  pairs_info: data/pitts250k/retrieval_results/train/pairs_info_20.npy
-  txt_path: data/pitts250k/retrieval_results/train/pairs_20.txt
-  image_root: data/pitts250k/images/train/
-  loftr_output: data/pitts250k/retrieval_results/train/loftr_matches/
+  retrieval_results: data/tokyo247/retrieval_results/train/indices_200.npy
+  pairs_info: data/tokyo247/retrieval_results/train/pairs_info_20.npy
+  txt_path: data/tokyo247/retrieval_results/train/pairs_20.txt
+  image_root: data/tokyo247/images/train/
+  loftr_output: data/tokyo247/retrieval_results/train/loftr_matches/
   loftr_weights: weights/outdoor_ds.ckpt

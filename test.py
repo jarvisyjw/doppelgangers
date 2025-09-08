@@ -85,7 +85,7 @@ def main_worker(gpu, ngpus_per_node, cfg, args):
     # trainer.resume(cfg.models.path,test=True)
     val_info = trainer.validate(test_loader, epoch=-1)
     trainer.log_val(val_info, writer=writer, step=-1)
-    print("Test done:")
+    print("Test done")
     writer.close()
 
 

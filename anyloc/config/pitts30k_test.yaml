@@ -1,8 +1,8 @@
 data:
   # dataset config
   type: anyloc.datasets.base_datasets
-  split: train
-  dataset_name: msls
+  split: test
+  dataset_name: pitts30k
   dataset_folder: data/
   output_path: retrieval_results/
   image_ext: jpg
@@ -11,7 +11,7 @@ data:
   resize: [640, 480]
   # dataloader config only used when cached is False
   num_workers: 4
-  batch_size: 8
+  batch_size: 16
   shuffle: False
 
 topk:
@@ -32,9 +32,9 @@ model:
   desc_facet: value # 'query', 'key', 'value', 'token'
 
 pairs_from_retrieval:
-  retrieval_results: data/msls/retrieval_results/train/indices_200.npy
-  output_path: data/msls/retrieval_results/train/pairs_200.npy
-  txt_path: data/msls/retrieval_results/train/pairs_20.txt
-  image_root: data/msls/images/train/
-  loftr_output: data/msls/retrieval_results/train/loftr_matches/
+  retrieval_results: data/pitts30k/retrieval_results/test/indices_200.npy
+  pairs_info: data/pitts30k/retrieval_results/test/pairs_info_20.npy
+  txt_path: data/pitts30k/retrieval_results/test/pairs_20.txt
+  image_root: data/pitts30k/images/test/
+  loftr_output: data/pitts30k/retrieval_results/test/loftr_matches/
   loftr_weights: weights/outdoor_ds.ckpt
