@@ -1,4 +1,5 @@
 
+
 class BaseTrainer():
 
     def __init__(self, cfg, args):
@@ -22,13 +23,23 @@ class BaseTrainer():
     def validate(self, test_loader, epoch, *args, **kwargs):
         raise NotImplementedError("Trainer [validate] not implemented.")
 
-    def log_val(self, val_info, writer=None, step=None, epoch=None, **kwargs):
-        if writer is not None:
+    def log_val(self, val_info, logger=None, step=None, epoch=None, **kwargs):
+        if logger is not None:
             for k, v in val_info.items():
                 if step is not None:
+                    logger.log()
                     writer.add_scalar(k+'_step', v, step)
                 else:
                     writer.add_scalar(k+'_epoch', v, epoch)
+    
+    
+    # def log_val(self, val_info, writer=None, step=None, epoch=None, **kwargs):
+    #     if writer is not None:
+    #         for k, v in val_info.items():
+    #             if step is not None:
+    #                 writer.add_scalar(k+'_step', v, step)
+    #             else:
+    #                 writer.add_scalar(k+'_epoch', v, epoch)
 
     def save(self, epoch=None, step=None, appendix=None, **kwargs):
         raise NotImplementedError("Trainer [save] not implemented.")
