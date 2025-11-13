@@ -254,7 +254,7 @@ def main():
         trainer.epoch_end(epoch, logger=logger if dist.get_rank() == 0 else None)
     
     if dist.get_rank() == 0:
-        logger.close()
+        logger.finish()
     
     # Clean up
     dist.destroy_process_group()

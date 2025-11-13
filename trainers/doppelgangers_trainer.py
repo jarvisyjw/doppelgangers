@@ -134,8 +134,8 @@ class Trainer(BaseTrainer):
                 pred = torch.argmax(score,dim=1)
                 batch_size = gt.size(0)
                 
-                if dist.get_rank() == 0 :
-                    print(f"batch_size:{batch_size}")
+                # if dist.get_rank() == 0 :
+                #     print(f"batch_size:{batch_size}")
                     
                 gt_tensor[current_idx:current_idx+batch_size] = gt
                 pred_tensor[current_idx:current_idx+batch_size] = pred
