@@ -36,6 +36,10 @@ def get_args():
     # parser.add_argument('--dist_url', default='env://', type=str,
     #                     help='url used to set up distributed training')
 
+
+    # overfitting for debug:
+    parser.add_argument('--overfit', default=False, action='store_true',
+                        help='Overfit on a single batch for debugging purposes.')
     # Resume:
     parser.add_argument('--resume', default=False, action='store_true')
     parser.add_argument('--pretrained', default=None, type=str,
@@ -151,7 +155,16 @@ def main():
     
     # Initialize datasets and loaders
     data_lib = importlib.import_module(cfg.data.type)
-    tr_dataset, te_dataset = data_lib.get_datasets(cfg.data)
+    if args.overfit:
+        if args.batch_size is None:
+            args.batch_size = cfg.data.train.batch_size
+        print("Overfitting on a single batch for debugging purposes.")
+        tr_dataset, _ = data_lib.get_datasets(cfg.data)
+        tr_dataset = torch.utils.data.Subset(tr_dataset, list(range(0, args.batch_size)))
+        te_dataset = tr_dataset
+    else:
+        tr_dataset, te_dataset = data_lib.get_datasets(cfg.data)
+
     
     # Adjust batch size based on number of GPUs if specified
     if args.batch_size is not None:
@@ -222,7 +235,7 @@ def main():
     for epoch in range(start_epoch, cfg.trainer.epochs):
         train_sampler.set_epoch(epoch)
         # TODO: Set seed for each epoch if needed
-        
+        # break
         # Train for one epoch
         for bidx, data in enumerate(train_loader):
             step = bidx + len(train_loader) * epoch + 1

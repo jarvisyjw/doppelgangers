@@ -32,7 +32,13 @@ class DoppelgangersDataset(Dataset):
         self.pairs_info = np.load(pair_path[0], allow_pickle=True)
         self.pairs_info0_length = len(self.pairs_info)
         if len(pair_path)==2:
-            self.pairs_info = np.concatenate([self.pairs_info, np.load(pair_path[1], allow_pickle=True)], axis=0)
+            pairs_1 = np.load(pair_path[1], allow_pickle=True)
+            if pairs_1.shape[1] != self.pairs_info.shape[1]:
+                if pairs_1.shape[1] ==4:
+                    self.pairs_info = np.concatenate([self.pairs_info, pairs_1[:,:3]], axis=0)
+                else:
+                    self.pairs_info = np.concatenate([self.pairs_info[:, :3], pairs_1], axis=0)
+            # self.pairs_info = np.concatenate([self.pairs_info, np.load(pair_path[1], allow_pickle=True)], axis=0)
         print('loading images, #pairs: ', len(self.pairs_info))
         self.img_size = img_size
 
@@ -42,7 +48,10 @@ class DoppelgangersDataset(Dataset):
     
 
     def __getitem__(self, idx):
-        name0, name1, label, num_matches = self.pairs_info[idx]
+        if len(self.pairs_info[idx]) ==3:
+            name0, name1, label = self.pairs_info[idx]
+        else:
+            name0, name1, label, num_matches = self.pairs_info[idx]
 
         if idx >= self.pairs_info0_length:
             img_name0 = osp.join(self.image_dir[1], name0)
