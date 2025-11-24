@@ -167,7 +167,8 @@ def save_loftr_matches_batch(data_path, pair_path, output_path, model_weight_pat
         shuffle=False,
         num_workers=num_workers,
         pin_memory=True,
-        drop_last=False
+        drop_last=False,
+        prefetch_factor=4
     )
     
     # Create output directory if it doesn't exist
@@ -179,14 +180,11 @@ def save_loftr_matches_batch(data_path, pair_path, output_path, model_weight_pat
     # Process batches
     for batch_data in tqdm.tqdm(dataloader):
         batch_indices = batch_data['idx'].numpy()
-        print(batch_data['image0'].shape)
         
-        # # Skip already processed pairs
+        # Skip already processed pairs
         to_process = []
         for i, idx in enumerate(batch_indices):
-            print(idx)
             if not osp.exists(f"{output_path}/{idx}.npy"):
-                print('Processing pair index:', idx)
                 to_process.append(i)
         
         if not to_process:
@@ -200,8 +198,7 @@ def save_loftr_matches_batch(data_path, pair_path, output_path, model_weight_pat
             'mask0': batch_data['mask0'][to_process].cuda(),
             'mask1': batch_data['mask1'][to_process].cuda()
         }
-        # print(batch_data['image0'].shape)
-        # break
+
         # Process with LoFTR
         with torch.no_grad():
             matcher(batch_to_process)
@@ -211,7 +208,6 @@ def save_loftr_matches_batch(data_path, pair_path, output_path, model_weight_pat
                 mkpts0 = batch_to_process['mkpts0_f'][i].cpu().numpy()
                 mkpts1 = batch_to_process['mkpts1_f'][i].cpu().numpy()
                 mconf = batch_to_process['mconf'][i].cpu().numpy()
-                
                 np.save(f"{output_path}/{idx[0]}.npy", {
                     "kpt0": mkpts0,
                     "kpt1": mkpts1,
