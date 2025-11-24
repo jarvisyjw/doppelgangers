@@ -28,6 +28,7 @@ class LoFTRMatchingDataset(Dataset):
         self.img_size = img_size
         self.df = df
         self.padding = padding
+        self.batch = True  # for batch processing
     
     def __len__(self):
         return len(self.pairs_info)
@@ -46,8 +47,8 @@ class LoFTRMatchingDataset(Dataset):
         img1_pth = osp.join(self.data_path, name1)
         
         # Read and process images
-        img0_raw, mask0 = read_image(img0_pth, self.img_size, self.df, self.padding)
-        img1_raw, mask1 = read_image(img1_pth, self.img_size, self.df, self.padding)
+        img0_raw, mask0 = read_image(img0_pth, self.img_size, self.df, self.padding, self.batch)
+        img1_raw, mask1 = read_image(img1_pth, self.img_size, self.df, self.padding, self.batch)
         
         return {
             'image0': torch.from_numpy(img0_raw),
@@ -80,7 +81,7 @@ def get_divisible_wh(w, h, df=None):
     return w_new, h_new
 
 
-def read_image(img_pth, img_size, df, padding):
+def read_image(img_pth, img_size, df, padding, batch=False):
     if str(img_pth).endswith('gif'):
         
         pil_image = ImageOps.grayscale(Image.open(str(img_pth)))
@@ -93,16 +94,50 @@ def read_image(img_pth, img_size, df, padding):
     w_new, h_new = get_divisible_wh(w_new, h_new, df)
 
     if padding:  # padding
-        pad_to = max(h_new, w_new)    
-        mask = np.zeros((1,pad_to, pad_to), dtype=bool)
-        mask[:,:h_new,:w_new] = True
-        mask = mask[:,::8,::8]
+        pad_to = max(h_new, w_new)
+        if batch:
+            mask = np.zeros((pad_to, pad_to), dtype=bool)
+            mask[:h_new, :w_new] = True
+            mask = mask[::8,::8]
+        else:
+            mask = np.zeros((1,pad_to, pad_to), dtype=bool)
+            mask[:,:h_new,:w_new] = True
+            mask = mask[:,::8,::8]
     
     image = cv2.resize(img_raw, (w_new, h_new))
-    pad_image = np.zeros((1,1, pad_to, pad_to), dtype=np.float32)
-    pad_image[0,0,:h_new,:w_new]=image/255.
+    if batch:
+        pad_image = np.zeros((1, pad_to, pad_to), dtype=np.float32)
+        pad_image[0,:h_new,:w_new]=image/255.
+    else:
+        pad_image = np.zeros((1,1, pad_to, pad_to), dtype=np.float32)
+        pad_image[0,0,:h_new,:w_new]=image/255.
 
     return pad_image, mask
+
+
+# def read_image(img_pth, img_size, df, padding):
+#     if str(img_pth).endswith('gif'):
+        
+#         pil_image = ImageOps.grayscale(Image.open(str(img_pth)))
+#         img_raw = np.array(pil_image)
+#     else:
+#         img_raw = cv2.imread(img_pth, cv2.IMREAD_GRAYSCALE)
+
+#     w, h = img_raw.shape[1], img_raw.shape[0]
+#     w_new, h_new = get_resized_wh(w, h, img_size)
+#     w_new, h_new = get_divisible_wh(w_new, h_new, df)
+
+#     if padding:  # padding
+#         pad_to = max(h_new, w_new)    
+#         mask = np.zeros((1,pad_to, pad_to), dtype=bool)
+#         mask[:,:h_new,:w_new] = True
+#         mask = mask[:,::8,::8]
+    
+#     image = cv2.resize(img_raw, (w_new, h_new))
+#     pad_image = np.zeros((1,1, pad_to, pad_to), dtype=np.float32)
+#     pad_image[0,0,:h_new,:w_new]=image/255.
+
+#     return pad_image, mask
 
 
 def save_loftr_matches_batch(data_path, pair_path, output_path, model_weight_path="weights/outdoor_ds.ckpt", batch_size=4, num_workers=4):
@@ -144,14 +179,18 @@ def save_loftr_matches_batch(data_path, pair_path, output_path, model_weight_pat
     # Process batches
     for batch_data in tqdm.tqdm(dataloader):
         batch_indices = batch_data['idx'].numpy()
+        print(batch_data['image0'].shape)
         
         # # Skip already processed pairs
         to_process = []
         for i, idx in enumerate(batch_indices):
+            print(idx)
             if not osp.exists(f"{output_path}/{idx}.npy"):
+                print('Processing pair index:', idx)
                 to_process.append(i)
         
         if not to_process:
+            print('All pairs in this batch are already processed. Skipping batch.')
             continue
             
         # Prepare batch for processing
@@ -173,7 +212,7 @@ def save_loftr_matches_batch(data_path, pair_path, output_path, model_weight_pat
                 mkpts1 = batch_to_process['mkpts1_f'][i].cpu().numpy()
                 mconf = batch_to_process['mconf'][i].cpu().numpy()
                 
-                np.save(f"{output_path}/{idx}.npy", {
+                np.save(f"{output_path}/{idx[0]}.npy", {
                     "kpt0": mkpts0,
                     "kpt1": mkpts1,
                     "conf": mconf
@@ -225,6 +264,4 @@ def save_loftr_matches(data_path, pair_path, output_path, model_weight_path="wei
             mconf = batch['mconf'].cpu().numpy()
 
             np.save(output_path+'/%d.npy'%idx, {"kpt0": mkpts0, "kpt1": mkpts1, "conf": mconf})
-            # np.save(output_path+'loftr_match/%d.npy'%idx, {"kpt0": mkpts0, "kpt1": mkpts1, "conf": mconf})
-
 
