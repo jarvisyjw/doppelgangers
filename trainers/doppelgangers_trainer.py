@@ -45,9 +45,11 @@ class Trainer(BaseTrainer):
 
     def epoch_end(self, epoch, logger=None, **kwargs):
         if self.scheduler_dec is not None:
-            self.scheduler_dec.step(epoch=epoch)
+            # self.scheduler_dec.step(epoch=epoch)
+            self.scheduler_dec.step()
             if logger is not None:
-                logger.log({"train/opt_dec_lr": self.scheduler_dec.get_lr()[0]}, step =epoch)
+                logger.log({"train/opt_dec_lr": self.scheduler_dec.get_last_lr()}, step=epoch)
+                # logger.log({"train/opt_dec_lr": self.scheduler_dec.get_lr()[0]}, step =epoch)
                 # writer.add_scalar(
                 #     'train/opt_dec_lr', self.scheduler_dec.get_lr()[0], epoch)
 

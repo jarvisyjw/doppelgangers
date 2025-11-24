@@ -16,13 +16,6 @@ import swanlab
 from jw_utils.tools import set_seed, init_np_seed, init_distributed_mode, reduce_tensor
 
 
-# def reduce_tensor(tensor):
-#     rt = tensor.clone()
-#     dist.all_reduce(rt, op=dist.ReduceOp.SUM)
-#     rt /= dist.get_world_size()
-#     return rt
-
-
 def get_args():
     # command line args
     parser = argparse.ArgumentParser(
@@ -36,6 +29,7 @@ def get_args():
     # parser.add_argument('--dist_url', default='env://', type=str,
     #                     help='url used to set up distributed training')
 
+    parser.add_argument('--dist_backend', default='nccl', type=str, help='backend used for distributed training')
 
     # overfitting for debug:
     parser.add_argument('--overfit', default=False, action='store_true',
