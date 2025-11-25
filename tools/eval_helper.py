@@ -6,7 +6,6 @@ from sklearn.metrics import average_precision_score, precision_recall_curve, Con
 from scipy.special import softmax
 import argparse
 
-
 # max recall @ 100% precision
 def max_recall(precision: np.ndarray, recall: np.ndarray):
     recall_idx = np.argmax(recall)
@@ -38,6 +37,7 @@ def plot_pr_curve(recall: np.ndarray, precision: np.ndarray, average_precision):
     plt.ylabel("Precision")
     plt.legend()
     plt.title("Precision-Recall Curves")
+    return average_precision, r_recall 
 
 
 def parser():
@@ -62,6 +62,7 @@ if __name__ == '__main__':
         # plot PR Curve
         precision, recall, TH = precision_recall_curve(gt_list, scores)
         average_precision = average_precision_score(gt_list, scores)
-        plot_pr_curve(recall, precision, average_precision)
+        AP, MR = plot_pr_curve(recall, precision, average_precision)
+        print(f"Average Precision: {AP}, Max Recall@100 {MR}.")
         # save figure
         plt.savefig(Path(args.val_log,'pr_curve.pdf'))
