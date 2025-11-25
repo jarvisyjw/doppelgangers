@@ -142,7 +142,15 @@ def read_image(img_pth, img_size, df, padding, batch=False):
 
 def save_loftr_matches_batch(data_path, pair_path, output_path, model_weight_path="weights/outdoor_ds.ckpt", batch_size=4, num_workers=4):
     """
-    TODO: Still bugs, need to fix.
+    TODO: Still bugy, need to fix.
+    BUG: I think the original loftr's network does not support the batch operation, which is also not possible.
+    However, I found that, the bugs are in the result extraction of loftr's processed result, the original implementation
+    of loftr seems not support the batch operations.
+                mkpts0 = batch_to_process['mkpts0_f'][i].cpu().numpy()
+                mkpts1 = batch_to_process['mkpts1_f'][i].cpu().numpy()
+                mconf = batch_to_process['mconf'][i].cpu().numpy()
+    The shape of mkpts0_f and mkpts1_f is [N,2] regardless of batched image pairs as input.
+    
     Process image pairs in batches using LoFTR matcher
     
     Args:
@@ -198,21 +206,29 @@ def save_loftr_matches_batch(data_path, pair_path, output_path, model_weight_pat
             'mask0': batch_data['mask0'][to_process].cuda(),
             'mask1': batch_data['mask1'][to_process].cuda()
         }
-
+        print(batch_data['image0'].shape)
+        print(batch_data['image1'].shape)
         # Process with LoFTR
         with torch.no_grad():
             matcher(batch_to_process)
             
             # Save results for each pair in the batch
             for i, idx in enumerate([batch_indices[j]] for j in to_process):
+                # print(batch_to_process['mkpts0_f'].shape)
+                # print(batch_to_process['mkpts1_f'].shape)
+                # print(batch_to_process['mconf'].shape)
+                
                 mkpts0 = batch_to_process['mkpts0_f'][i].cpu().numpy()
                 mkpts1 = batch_to_process['mkpts1_f'][i].cpu().numpy()
                 mconf = batch_to_process['mconf'][i].cpu().numpy()
+                # print(batch_to_process)
+                
                 np.save(f"{output_path}/{idx[0]}.npy", {
                     "kpt0": mkpts0,
                     "kpt1": mkpts1,
                     "conf": mconf
                 })
+            break
 
 
 def save_loftr_matches(data_path, pair_path, output_path, model_weight_path="weights/outdoor_ds.ckpt"):

@@ -90,7 +90,7 @@ class DoppelgangersDataset(Dataset):
 
         return data
 
-def get_datasets(cfg):
+def get_datasets(cfg, skip=-1):
     tr_dataset = DoppelgangersDataset(
                 cfg.train.image_dir,
                 cfg.train.loftr_match_dir,
@@ -103,6 +103,10 @@ def get_datasets(cfg):
                 cfg.test.pair_path,
                 img_size=getattr(cfg.test, "img_size", 640),
                 phase='Test')
+    if skip > 0:
+        tr_dataset.pairs_info = tr_dataset.pairs_info[skip:]
+        te_dataset.pairs_info = te_dataset.pairs_info[skip:]
+        print("Using a smaller dataset for testing: %d pairs for training, %d pairs for testing." % (skip, skip))
 
     return tr_dataset, te_dataset
 
@@ -112,8 +116,8 @@ def init_np_seed(worker_id):
     np.random.seed(seed % 4294967296)
 
 
-def get_data_loaders(cfg):
-    tr_dataset, te_dataset = get_datasets(cfg)
+def get_data_loaders(cfg, skip=-1):
+    tr_dataset, te_dataset = get_datasets(cfg, skip=skip)
     train_loader = torch.utils.data.DataLoader(
         dataset=tr_dataset, batch_size=cfg.train.batch_size,
         shuffle=True, num_workers=cfg.num_workers, drop_last=True,

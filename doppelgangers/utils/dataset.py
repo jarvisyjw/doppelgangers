@@ -99,6 +99,7 @@ def read_loftr_matches(path0, path1,
         w_kpt = w_new0
         h_kpt = h_new0
         warp_keypoints0 = keypoints0
+        # print(f"keypoint0 {keypoints0.shape}, keypoint1 {keypoints1.shape}")
         valid_warp_pts = (warp_keypoints0[:,0]>=0) & (warp_keypoints0[:,0]<w_kpt) & (warp_keypoints0[:,1]>=0) & (warp_keypoints0[:,1]<h_kpt)
         warp_rgb = False
 

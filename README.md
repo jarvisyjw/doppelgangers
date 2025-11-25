@@ -337,4 +337,7 @@ Follow the instructions in [VPR-datasets-downloader](https://github.com/gmberton
 |:---: | :---: | :---:| :---:|
 |Pre-trained (Doppelgangers)| val| 64.030 | 0 |
 |Pre-trained (Doppelgangers)|test|
-  
+
+
+# TODO:
+- [ ] expand `save_loftr_matches` to process a batch of image pairs.  
